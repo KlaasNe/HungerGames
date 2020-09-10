@@ -2,6 +2,7 @@ from random import randint
 
 from HelpFunctions import *
 from Player import Player
+from Events import Events
 
 
 class HungerGame:
@@ -17,10 +18,10 @@ class HungerGame:
 
     def init_players(self):
         players = []
-        for player_nr in range(self.distr * 2):
+        for player_nr in range(self.distr * self.teamsize):
             player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
             player_gender = input("Gender tribute (m/f/x)\n> ")
-            tribute_nr = player_nr // 2 + 1
+            tribute_nr = player_nr // self.teamsize + 1
             players.append(Player(player_name, player_gender, tribute_nr))
         return players
 
@@ -33,23 +34,41 @@ class HungerGame:
 
     def pass_day(self):
         print("**Day {}**\n".format(self.day_count))
+        self.do_2player_event()
         self.night = True
 
     def pass_night(self):
         print("**Night {}**\n".format(self.day_count))
-        print("Everyone falls asleep")
+        self.do_2player_event()
         self.day_count += 1
         self.night = False
 
+    def do_2player_event(self):
+        event_nr = randint(0, len(Events.twopl) - 1)
+        event = Events.twopl[event_nr]
+        player1, player2 = self.select_2_players()
+        player1.health += event.self_hp_delta
+        player1.energy += event.self_energy_delta
+        player2.health += event.other_hp_delta
+        player2.energy += event.other_energy_delta
+        print(event.description.format(player1.to_string(), player2.to_string()))
+
+        if player1.is_dead():
+            self.kill(player2, player1)
+
+        if player2.is_dead():
+            self.kill(player1, player2)
+
+    def select_2_players(self):
+        player1 = self.alive[randint(0, self.players_live() - 1)]
+        player2 = self.alive[randint(0, self.players_live() - 1)]
+        while player2.to_string() == player1.to_string() or self.same_team(player1, player2):
+            player2 = self.alive[randint(0, self.players_live() - 1)]
+        return player1, player2
+
     def kill(self, killer, victim):
-        # plnr1 = randint(0, self.players_live() - 1)
-        # plnr2 = randint(0, self.players_live() - 1)
-        # while plnr2 == plnr1:
-        #     plnr2 = randint(0, self.players_live() - 1)
-        # player1, player2 = self.alive[plnr1], self.alive[plnr2]
-        print("{} kills {}.".format(killer.to_string(), victim.to_string()))
         self.dead.append(victim)
-        self.alive.pop(victim)
+        self.alive.remove(victim)
         killer.kills += 1
 
     def finished(self):
@@ -67,8 +86,11 @@ def main():
     while not game.finished():
         enter()
         game.pass_day()
-        enter()
-        game.pass_night()
+        if not game.finished():
+            enter()
+            game.pass_night()
+
+    quit()
 
 
 if __name__ == "__main__":
