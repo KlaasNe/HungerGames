@@ -17,6 +17,9 @@ class Player:
             self.gender = "x"
         self.pron1, self.pron2, self.pron3 = pronouns[self.gender.lower()]
 
+    def is_dead(self):
+        return self.health <= 0
+
     def to_string(self):
         return self.name
 
