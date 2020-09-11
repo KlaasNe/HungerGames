@@ -42,7 +42,8 @@ class HungerGame:
     def pass_day(self):
         print("\n**Day {}**".format(self.day_count))
         self.do_2player_event()
-        self.do_2player_event()
+        if not self.finished():
+            self.do_2player_event()
         self.night = True
 
     def pass_night(self):
@@ -78,7 +79,7 @@ class HungerGame:
         self.dead.append(victim)
         self.alive.remove(victim)
         killer.kills += 1
-        print(">{} is now dead.".format(victim.to_string()))
+        print("> {} is now dead. 💀".format(victim.to_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -106,8 +107,7 @@ def main():
             # enter()
             game.pass_night()
 
-    print("|| winner(s): {} ||".format(str(game.players_to_string(game.alive))))
-    print("\n")
+    print("\n|| winner(s): {} ||".format(str(game.players_to_string(game.alive))) + "\n")
     game.print_kill_counts()
 
     quit()
