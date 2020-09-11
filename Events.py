@@ -18,7 +18,15 @@ one_player_actions = {
 }
 
 two_player_actions = [
-    Event("{} kills {}.", other_hp_delta=-999)
+    # Event("{} kills {}.", other_hp_delta=-999),
+    Event("{} liet noten zien aan {}.", other_hp_delta=-50),
+    Event("{} laat heel harde scheet op {}.", other_hp_delta=-5),
+    Event("{} niest op {}.", other_hp_delta=-1),
+    Event("{} gooit steen in het gezicht van {}.", other_hp_delta=-30),
+    Event("{} geeft {} dikke petsen in het gezicht.", other_hp_delta=-10),
+    Event("{} legt ballen in de nek van {}.", other_hp_delta=-69),
+    Event("Door het lopen van {} is de clapp van de asscheeks hoorbaar voor {} en meetbaar op de schaal van richter.", other_hp_delta=-25, self_hp_delta=-10),
+    Event("{} wilt sneaky in de rug aanvallen, maar {} is sterker en doet een gekke John Cena move", self_hp_delta=-60, other_hp_delta=-15)
 ]
 
 team_actions = {

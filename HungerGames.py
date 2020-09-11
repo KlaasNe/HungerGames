@@ -20,7 +20,7 @@ class HungerGame:
         players = []
         for player_nr in range(self.distr * self.teamsize):
             player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
-            player_gender = input("Gender tribute (m/f/x)\n> ")
+            player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
             tribute_nr = player_nr // self.teamsize + 1
             players.append(Player(player_name, player_gender, tribute_nr))
         return players
@@ -29,16 +29,24 @@ class HungerGame:
     def same_team(player1, player2):
         return player1.team_name == player2.team_name
 
+    @staticmethod
+    def players_to_string(list):
+        str_list = ""
+        for player in list:
+            str_list += (player.to_string())
+        return str_list
+
     def players_live(self):
         return len(self.alive)
 
     def pass_day(self):
-        print("**Day {}**\n".format(self.day_count))
+        print("\n**Day {}**".format(self.day_count))
+        self.do_2player_event()
         self.do_2player_event()
         self.night = True
 
     def pass_night(self):
-        print("**Night {}**\n".format(self.day_count))
+        print("\n**Night {}**".format(self.day_count))
         self.do_2player_event()
         self.day_count += 1
         self.night = False
@@ -70,6 +78,7 @@ class HungerGame:
         self.dead.append(victim)
         self.alive.remove(victim)
         killer.kills += 1
+        print(">{} is now dead.".format(victim.to_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -80,15 +89,26 @@ class HungerGame:
         else:
             return False
 
+    def print_kill_counts(self):
+        players = self.alive + self.dead
+        players.sort(key=lambda plyr: plyr.kills, reverse=True)
+        for player in players:
+            print("{} has {} kills".format(player.to_string(), str(player.kills)))
+
 
 def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
+    print(".")
     while not game.finished():
-        enter()
+        # enter()
         game.pass_day()
         if not game.finished():
-            enter()
+            # enter()
             game.pass_night()
+
+    print("|| winner(s): {} ||".format(str(game.players_to_string(game.alive))))
+    print("\n")
+    game.print_kill_counts()
 
     quit()
 
