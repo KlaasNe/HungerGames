@@ -21,6 +21,7 @@ class HungerGame:
         players = []
         for player_nr in range(self.distr * self.teamsize):
             player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
+            player_name = add_escapes(player_name)  # TODO 2 names pp 1 with esc, 1 normal
             player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
             tribute_nr = player_nr // self.teamsize + 1
             players.append(Player(player_name, player_gender, tribute_nr))
@@ -63,7 +64,7 @@ class HungerGame:
 
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
-        event_nr = randint(0, len(Events.onepl) - 1)
+        event_nr = randint(0, len(Events.onepl["yes"]) - 1)
         event = Events.onepl["yes"][event_nr]
         print("❕ " + event.description.format(player.to_string(), player.to_string()))
         player.health += event.self_hp_delta

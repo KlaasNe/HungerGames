@@ -12,7 +12,7 @@ class Event:
 
 
 one_player_actions = {
-    "yes":[
+    "yes": [
         Event("{} falls in a pit.", self_hp_delta=-35),
         Event("{} didn't see a branch and ran into it.", self_hp_delta=-20),
         Event("{} rests for a bit.", self_hp_delta=12),
