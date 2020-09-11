@@ -15,6 +15,7 @@ class HungerGame:
         self.night = False
         self.alive = self.init_players()
         self.dead = []
+        self.died_today = []
 
     def init_players(self):
         players = []
@@ -30,37 +31,68 @@ class HungerGame:
         return player1.team_name == player2.team_name
 
     @staticmethod
-    def players_to_string(list):
-        str_list = ""
-        for player in list:
-            str_list += (player.to_string())
-        return str_list
+    def players_to_string(to_conv_list):
+        str_list = []
+        for player in to_conv_list:
+            str_list.append(player.to_string())
+        return ", ".join(str_list)
 
     def players_live(self):
         return len(self.alive)
 
     def pass_day(self):
         print("\n**Day {}**".format(self.day_count))
-        self.do_2player_event()
-        if not self.finished():
-            self.do_2player_event()
+        event_count = 5
+        for event in range(event_count):
+            if not self.finished():
+                self.do_2player_event()
+            if not self.finished():
+                self.do_1player_event()
         self.night = True
 
     def pass_night(self):
         print("\n**Night {}**".format(self.day_count))
-        self.do_2player_event()
+        event_count = 2
+        for event in range(event_count):
+            if not self.finished():
+                self.do_2player_event()
+            if not self.finished():
+                self.do_1player_event()
         self.day_count += 1
         self.night = False
 
+    def do_1player_event(self):
+        player = self.alive[randint(0, len(self.alive) - 1)]
+        event_nr = randint(0, len(Events.onepl) - 1)
+        event = Events.onepl["yes"][event_nr]
+        print("❕ " + event.description.format(player.to_string(), player.to_string()))
+        player.health += event.self_hp_delta
+        player.energy += event.self_energy_delta
+
+        if player.health > player.max_health:
+            player.health = player.max_health
+
+        if player.is_dead():
+            self.kill(None, player)
+
     def do_2player_event(self):
-        event_nr = randint(0, len(Events.twopl) - 1)
-        event = Events.twopl[event_nr]
         player1, player2 = self.select_2_players()
+        if self.same_team(player1, player2):
+            event_nr = randint(0, len(Events.twopl["help"]) - 1)
+            event = Events.twopl["help"][event_nr]
+            print("🩹 " + event.description.format(player1.to_string(), player2.to_string()))
+        else:
+            event_nr = randint(0, len(Events.twopl["fight"]) - 1)
+            event = Events.twopl["fight"][event_nr]
+            print("⚔ " + event.description.format(player1.to_string(), player2.to_string()))
         player1.health += event.self_hp_delta
         player1.energy += event.self_energy_delta
         player2.health += event.other_hp_delta
         player2.energy += event.other_energy_delta
-        print(event.description.format(player1.to_string(), player2.to_string()))
+        if player1.health > player1.max_health:
+            player1.health = player1.max_health
+        if player2.health > player2.max_health:
+            player2.health = player2.max_health
 
         if player1.is_dead():
             self.kill(player2, player1)
@@ -71,15 +103,16 @@ class HungerGame:
     def select_2_players(self):
         player1 = self.alive[randint(0, self.players_live() - 1)]
         player2 = self.alive[randint(0, self.players_live() - 1)]
-        while player2.to_string() == player1.to_string() or self.same_team(player1, player2):
+        while player2.to_string() == player1.to_string():  # or self.same_team(player1, player2):
             player2 = self.alive[randint(0, self.players_live() - 1)]
         return player1, player2
 
     def kill(self, killer, victim):
         self.dead.append(victim)
         self.alive.remove(victim)
-        killer.kills += 1
-        print("> {} is now dead. 💀".format(victim.to_string()))
+        if killer is not None:
+            killer.kills += 1
+        print("> 💀 {} is now dead.".format(victim.to_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -96,6 +129,12 @@ class HungerGame:
         for player in players:
             print("{} has {} kills".format(player.to_string(), str(player.kills)))
 
+    def print_stats(self):
+        print("\n```\n❤ HP UPDATE ❤")
+        for player in self.alive:
+            print("> {} has {} hp left.".format(player.to_string(), str(player.health)))
+        print("```")
+
 
 def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
@@ -106,6 +145,7 @@ def main():
         if not game.finished():
             # enter()
             game.pass_night()
+        game.print_stats()
 
     print("\n|| winner(s): {} ||".format(str(game.players_to_string(game.alive))) + "\n")
     game.print_kill_counts()
