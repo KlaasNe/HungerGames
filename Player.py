@@ -15,6 +15,7 @@ class Player:
 
         self.asleep = False
         self.kills = 0
+        self.items = []
 
         pronouns = {"m": ["his", "him", "he"], "f": ["her", "her", "she"], "x": ["their", "them", "they"]}
         if self.gender.lower() not in pronouns.keys():

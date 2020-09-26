@@ -3,6 +3,7 @@ from random import randint
 from HelpFunctions import *
 from Player import Player
 from Events import Events
+from Items import Items
 
 
 class HungerGame:
@@ -70,36 +71,55 @@ class HungerGame:
 
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
-        event_nr = randint(0, len(Events.onepl["yes"]) - 1)
-        event = Events.onepl["yes"][event_nr]
-        print("❕ " + event.description.format(player.to_esc_string()))
-        player.health += event.self_hp_delta
-        player.energy += event.self_energy_delta
+        if randint(0, 1) == 0:
+            item_nr = randint(0, len(Items.weapons["melee"]) - 1)
+            item = Items.weapons["melee"][item_nr]
+            if len(player.items) == 0:
+                player.items.append(item)
+            else:
+                player.items[0] = item
+            print("❔ {} found an item: '{}'".format(player.to_esc_string(), item.name))
+        else:
+            event_nr = randint(0, len(Events.onepl["yes"]) - 1)
+            event = Events.onepl["yes"][event_nr]
+            print("❕ " + event.description.format(player.to_esc_string()))
+            player.health += event.self_hp_delta
+            player.energy += event.self_energy_delta
 
-        if player.health > player.max_health:
-            player.health = player.max_health
+            if player.health > player.max_health:
+                player.health = player.max_health
 
-        if player.is_dead():
-            self.kill(None, player)
+            if player.is_dead():
+                self.kill(None, player)
 
     def do_2player_event(self):
+        normal_event = False
         player1, player2 = self.select_2_players()
         if self.same_team(player1, player2):
+            normal_event = True
             event_nr = randint(0, len(Events.twopl["help"]) - 1)
             event = Events.twopl["help"][event_nr]
             print("🩹 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
         else:
             event_nr = randint(0, len(Events.twopl["fight"]) - 1)
             event = Events.twopl["fight"][event_nr]
-            print("⚔ " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
-        player1.health += event.self_hp_delta
-        player1.energy += event.self_energy_delta
-        player2.health += event.other_hp_delta
-        player2.energy += event.other_energy_delta
-        if player1.health > player1.max_health:
-            player1.health = player1.max_health
-        if player2.health > player2.max_health:
-            player2.health = player2.max_health
+            print("🥊 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
+
+            player1.health += event.self_hp_delta
+            player1.energy += event.self_energy_delta
+            player2.health += event.other_hp_delta
+            player2.energy += event.other_energy_delta
+            if player1.health > player1.max_health:
+                player1.health = player1.max_health
+            if player2.health > player2.max_health:
+                player2.health = player2.max_health
+
+        if not normal_event:
+            normal_event = randint(0, 3) == 0 if len(player1.items) > 0 else True
+
+        if not normal_event:
+            print("⚔ " + "{} hits {} with a {}".format(player1.to_esc_string(), player2.to_esc_string(), player1.items[0].name))
+            player2.health -= player1.items[0].dmg
 
         if player1.is_dead():
             self.kill(player2, player1)
@@ -119,7 +139,7 @@ class HungerGame:
         self.alive.remove(victim)
         if killer is not None:
             killer.kills += 1
-        print("> 💀 {} is now dead.".format(victim.to_esc_string()))
+        print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
