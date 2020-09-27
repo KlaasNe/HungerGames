@@ -13,13 +13,12 @@ class Event:
 
 one_player_actions = {
     "yes": [
-        Event("{} falls in a pit.", self_hp_delta=-35),
-        Event("{} didn't see a branch and ran into it.", self_hp_delta=-20),
+        Event("{} falls in a pit.", self_hp_delta=-15),
+        Event("{} didn't see a branch and ran into it.", self_hp_delta=-8),
         Event("{} rests for a bit.", self_hp_delta=8),
-        Event("{} cries of despair.", self_hp_delta=-25),
-        Event("{} takes a bath in a hot water pond.", self_hp_delta=20),
-        Event("{} eats some nuts."),
-        Event("{} tries summoning a fireball but fails.", self_hp_delta=-25)
+        Event("{} cries of despair.", self_hp_delta=-5),
+        Event("{} takes a bath in a hot water pond.", self_hp_delta=15),
+        Event("{} tries lighting a fire, but fails XD", self_hp_delta=-25)
     ]
 }
 
@@ -36,9 +35,9 @@ two_player_actions = {
         Event("{} kicks {}'s kneecaps.", other_hp_delta=-15)
     ],
     "help": [
-        Event("{} gives {} some medical herbs.", other_hp_delta=15),
+        Event("{} gives {} some medical herbs.", other_hp_delta=10),
         Event("{} gives {} a massage.", other_hp_delta=5),
-        Event("{} and {} take a bath together, in a hot water pond.", self_hp_delta=20, other_hp_delta=20)
+        Event("{} and {} take a bath together, in a hot water pond.", self_hp_delta=15, other_hp_delta=15)
         # Event("{} feeds {}.", other_energy_delta=60, self_energy_delta=60)
     ],
     "misc": [

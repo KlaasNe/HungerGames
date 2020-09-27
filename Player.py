@@ -22,6 +22,31 @@ class Player:
             self.gender = "x"
         self.pron1, self.pron2, self.pron3 = pronouns[self.gender.lower()]
 
+    def get_dmg(self):
+        dmg = 0
+        for item in self.items:
+            dmg += item.dmg
+        return dmg
+
+    def get_res(self):
+        res = 0
+        for item in self.items:
+            res += item.res
+        return res
+
+    def get_prc(self):
+        prc = 0
+        for item in self.items:
+            prc += item.prc
+        return prc
+
+    def get_weapon(self):
+        weapons = []
+        for item in self.items:
+            if item.item_type == "weapon":
+                weapons.append(item)
+        return weapons
+
     def is_dead(self):
         return self.health <= 0
 

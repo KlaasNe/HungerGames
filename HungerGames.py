@@ -50,8 +50,8 @@ class HungerGame:
 
     def pass_day(self):
         print("\n**Day {}**".format(self.day_count))
-        event_count = 5
-        for event in range(event_count):
+        event_count = 16
+        for event in range(event_count // 2):
             if not self.finished():
                 self.do_2player_event()
             if not self.finished():
@@ -60,8 +60,8 @@ class HungerGame:
 
     def pass_night(self):
         print("\n**Night {}**".format(self.day_count))
-        event_count = 2
-        for event in range(event_count):
+        event_count = 8
+        for event in range(event_count // 2):
             if not self.finished():
                 self.do_2player_event()
             if not self.finished():
@@ -71,14 +71,14 @@ class HungerGame:
 
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
-        if randint(0, 1) == 0:
+        if randint(0, 2) == 0:
             item_nr = randint(0, len(Items.weapons["melee"]) - 1)
             item = Items.weapons["melee"][item_nr]
             if len(player.items) == 0:
                 player.items.append(item)
             else:
                 player.items[0] = item
-            print("❔ {} found an item: '{}'".format(player.to_esc_string(), item.name))
+            print("❔ {} found an item: _{}_".format(player.to_esc_string(), item.name))
         else:
             event_nr = randint(0, len(Events.onepl["yes"]) - 1)
             event = Events.onepl["yes"][event_nr]
@@ -93,33 +93,38 @@ class HungerGame:
                 self.kill(None, player)
 
     def do_2player_event(self):
-        normal_event = False
         player1, player2 = self.select_2_players()
         if self.same_team(player1, player2):
-            normal_event = True
             event_nr = randint(0, len(Events.twopl["help"]) - 1)
             event = Events.twopl["help"][event_nr]
+            self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
             print("🩹 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
-        else:
+        elif randint(0, 3) == 0:
             event_nr = randint(0, len(Events.twopl["fight"]) - 1)
             event = Events.twopl["fight"][event_nr]
+            self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
             print("🥊 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
+        else:
+            weapon = player1.get_weapon()
+            if weapon:
+                weapon = player1.get_weapon()[0]
+                other_dmg = -player1.get_dmg()
+                self_dmg = 0
+                combat_txt = "⚔ " + "{} hits {} with a _{}_."
+                print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), weapon.name))
+            else:
+                slap_dmg = -3
+                other_punches, self_punches = randint(3, 6), randint(1, 4)
+                other_dmg, self_dmg = slap_dmg * other_punches, slap_dmg * self_punches
+                combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
+                print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), other_punches, self_punches))
 
-            player1.health += event.self_hp_delta
-            player1.energy += event.self_energy_delta
-            player2.health += event.other_hp_delta
-            player2.energy += event.other_energy_delta
-            if player1.health > player1.max_health:
-                player1.health = player1.max_health
-            if player2.health > player2.max_health:
-                player2.health = player2.max_health
-
-        if not normal_event:
-            normal_event = randint(0, 3) == 0 if len(player1.items) > 0 else True
-
-        if not normal_event:
-            print("⚔ " + "{} hits {} with a {}".format(player1.to_esc_string(), player2.to_esc_string(), player1.items[0].name))
-            player2.health -= player1.items[0].dmg
+        player1.health += self_dmg
+        player2.health += other_dmg
+        if player1.health > player1.max_health:
+            player1.health = player1.max_health
+        if player2.health > player2.max_health:
+            player2.health = player2.max_health
 
         if player1.is_dead():
             self.kill(player2, player1)
