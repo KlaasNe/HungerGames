@@ -3,6 +3,7 @@ from random import randint
 from HelpFunctions import *
 from Player import Player
 from Events import Events
+from Items import Items
 
 
 class HungerGame:
@@ -21,7 +22,6 @@ class HungerGame:
         players = []
         for player_nr in range(self.distr * self.teamsize):
             player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
-            player_name = add_escapes(player_name)  # TODO 2 names pp 1 with esc, 1 normal
             player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
             tribute_nr = player_nr // self.teamsize + 1
             players.append(Player(player_name, player_gender, tribute_nr))
@@ -36,6 +36,13 @@ class HungerGame:
         str_list = []
         for player in to_conv_list:
             str_list.append(player.to_string())
+        return ", ".join(str_list)
+
+    @staticmethod
+    def players_to_esc_string(to_conv_list):
+        str_list = []
+        for player in to_conv_list:
+            str_list.append(player.to_esc_string())
         return ", ".join(str_list)
 
     def players_live(self):
@@ -64,36 +71,55 @@ class HungerGame:
 
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
-        event_nr = randint(0, len(Events.onepl["yes"]) - 1)
-        event = Events.onepl["yes"][event_nr]
-        print("❕ " + event.description.format(player.to_string(), player.to_string()))
-        player.health += event.self_hp_delta
-        player.energy += event.self_energy_delta
+        if randint(0, 1) == 0:
+            item_nr = randint(0, len(Items.weapons["melee"]) - 1)
+            item = Items.weapons["melee"][item_nr]
+            if len(player.items) == 0:
+                player.items.append(item)
+            else:
+                player.items[0] = item
+            print("❔ {} found an item: '{}'".format(player.to_esc_string(), item.name))
+        else:
+            event_nr = randint(0, len(Events.onepl["yes"]) - 1)
+            event = Events.onepl["yes"][event_nr]
+            print("❕ " + event.description.format(player.to_esc_string()))
+            player.health += event.self_hp_delta
+            player.energy += event.self_energy_delta
 
-        if player.health > player.max_health:
-            player.health = player.max_health
+            if player.health > player.max_health:
+                player.health = player.max_health
 
-        if player.is_dead():
-            self.kill(None, player)
+            if player.is_dead():
+                self.kill(None, player)
 
     def do_2player_event(self):
+        normal_event = False
         player1, player2 = self.select_2_players()
         if self.same_team(player1, player2):
+            normal_event = True
             event_nr = randint(0, len(Events.twopl["help"]) - 1)
             event = Events.twopl["help"][event_nr]
-            print("🩹 " + event.description.format(player1.to_string(), player2.to_string()))
+            print("🩹 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
         else:
             event_nr = randint(0, len(Events.twopl["fight"]) - 1)
             event = Events.twopl["fight"][event_nr]
-            print("⚔ " + event.description.format(player1.to_string(), player2.to_string()))
-        player1.health += event.self_hp_delta
-        player1.energy += event.self_energy_delta
-        player2.health += event.other_hp_delta
-        player2.energy += event.other_energy_delta
-        if player1.health > player1.max_health:
-            player1.health = player1.max_health
-        if player2.health > player2.max_health:
-            player2.health = player2.max_health
+            print("🥊 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
+
+            player1.health += event.self_hp_delta
+            player1.energy += event.self_energy_delta
+            player2.health += event.other_hp_delta
+            player2.energy += event.other_energy_delta
+            if player1.health > player1.max_health:
+                player1.health = player1.max_health
+            if player2.health > player2.max_health:
+                player2.health = player2.max_health
+
+        if not normal_event:
+            normal_event = randint(0, 3) == 0 if len(player1.items) > 0 else True
+
+        if not normal_event:
+            print("⚔ " + "{} hits {} with a {}".format(player1.to_esc_string(), player2.to_esc_string(), player1.items[0].name))
+            player2.health -= player1.items[0].dmg
 
         if player1.is_dead():
             self.kill(player2, player1)
@@ -104,7 +130,7 @@ class HungerGame:
     def select_2_players(self):
         player1 = self.alive[randint(0, self.players_live() - 1)]
         player2 = self.alive[randint(0, self.players_live() - 1)]
-        while player2.to_string() == player1.to_string():  # or self.same_team(player1, player2):
+        while player2.to_string() == player1.to_string():
             player2 = self.alive[randint(0, self.players_live() - 1)]
         return player1, player2
 
@@ -113,7 +139,7 @@ class HungerGame:
         self.alive.remove(victim)
         if killer is not None:
             killer.kills += 1
-        print("> 💀 {} is now dead.".format(victim.to_string()))
+        print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -128,7 +154,7 @@ class HungerGame:
         players = self.alive + self.dead
         players.sort(key=lambda plyr: plyr.kills, reverse=True)
         for player in players:
-            print("{} has {} kills".format(player.to_string(), str(player.kills)))
+            print("{} has {} kills".format(player.to_esc_string(), str(player.kills)))
 
     def print_stats(self):
         print("\n```\n❤ HP UPDATE ❤")
@@ -148,7 +174,7 @@ def main():
             game.pass_night()
         game.print_stats()
 
-    print("\n|| winner(s): {} ||".format(str(game.players_to_string(game.alive))) + "\n")
+    print("\n|| winner(s): {} ||".format(str(game.players_to_esc_string(game.alive))) + "\n")
     game.print_kill_counts()
 
     quit()

@@ -15,39 +15,39 @@ one_player_actions = {
     "yes": [
         Event("{} falls in a pit.", self_hp_delta=-35),
         Event("{} didn't see a branch and ran into it.", self_hp_delta=-20),
-        Event("{} rests for a bit.", self_hp_delta=12),
-        Event("{} is even aan het chillen met de homies.", self_hp_delta=7),
-        Event("{} cries of despair.", self_hp_delta=-25)
+        Event("{} rests for a bit.", self_hp_delta=8),
+        Event("{} cries of despair.", self_hp_delta=-25),
+        Event("{} takes a bath in a hot water pond.", self_hp_delta=20),
+        Event("{} eats some nuts."),
+        Event("{} tries summoning a fireball but fails.", self_hp_delta=-25)
     ]
 }
 
 two_player_actions = {
     "fight": [
         # Event("{} kills {}.", other_hp_delta=-999),
-        Event("{} liet noten zien aan {}.", other_hp_delta=-69),
-        Event("{} laat heel harde scheet op {}.", other_hp_delta=-30),
-        Event("{} stampt op {}.", other_hp_delta=-70),
-        Event("{} gooit steen in het gezicht van {}.", other_hp_delta=-80),
-        Event("{} geeft {} dikke petsen in het gezicht.", other_hp_delta=-41),
-        Event("{} legt ballen in de nek van {}.", other_hp_delta=-69),
-        Event("Door het lopen van {} is de clapp van de asscheeks hoorbaar voor {} en meetbaar op de schaal van richter.", other_hp_delta=-45, self_hp_delta=-20),
-        Event("{} wilt sneaky in de rug aanvallen, maar {} is sterker en doet een gekke John Cena move.", self_hp_delta=-60, other_hp_delta=-15),
-        Event("{} pist tegen de benen van {}.", other_hp_delta=-50)
+        Event("{} tries to attack from behind, but {} is stronger and does a sick John Cena move.", self_hp_delta=-30, other_hp_delta=-10),
+        Event("{} throws a big rock in {}'s face.", other_hp_delta=-20),
+        Event("{} throws a pebble in {}'s face.", other_hp_delta=-10),
+        Event("{} slaps {} really hard.", other_hp_delta=-5, self_hp_delta=-2),
+        Event("{} headbutts {}'s face.", other_hp_delta=-20, self_hp_delta=-10),
+        Event("{} yells 'KAMEHAMEHAAA' really loud and shoots a large beam at {}.", other_hp_delta=-100),
+        Event("{} bites {} and sucks some of their blood.", other_hp_delta=-15, self_hp_delta=15),
+        Event("{} kicks {}'s kneecaps.", other_hp_delta=-15)
     ],
     "help": [
-        Event("{} gives {} some medical herbs.", other_hp_delta=25),
-        Event("{} gives {} a massage.", other_hp_delta=10),
-        Event("{} and {} take a bath in a hot water pond.", other_hp_delta=40)
+        Event("{} gives {} some medical herbs.", other_hp_delta=15),
+        Event("{} gives {} a massage.", other_hp_delta=5),
+        Event("{} and {} take a bath together, in a hot water pond.", self_hp_delta=20, other_hp_delta=20)
         # Event("{} feeds {}.", other_energy_delta=60, self_energy_delta=60)
+    ],
+    "misc": [
+        Event("undefined event"),
+        # Event("Steal item")
     ]
-}
-
-team_actions = {
-    # "raid"
 }
 
 
 class Events:
     onepl = one_player_actions
     twopl = two_player_actions
-    team = team_actions
