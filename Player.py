@@ -3,11 +3,12 @@ from HelpFunctions import add_escapes
 
 class Player:
 
-    def __init__(self, name, gender, team_name, max_health=120, health=100, max_energy=100, energy=100):
+    def __init__(self, name, gender, team_name, victory_msg="", max_health=120, health=100, max_energy=100, energy=100):
         self.name = name
         self.esc_name = add_escapes(name)
         self.gender = gender
         self.team_name = team_name
+        self.victory_msg = victory_msg
         self.max_health = max_health
         self.health = health
         self.max_energy = max_energy
@@ -21,6 +22,31 @@ class Player:
         if self.gender.lower() not in pronouns.keys():
             self.gender = "x"
         self.pron1, self.pron2, self.pron3 = pronouns[self.gender.lower()]
+
+    def get_dmg(self):
+        dmg = 0
+        for item in self.items:
+            dmg += item.dmg
+        return dmg
+
+    def get_res(self):
+        res = 0
+        for item in self.items:
+            res += item.res
+        return res
+
+    def get_prc(self):
+        prc = 0
+        for item in self.items:
+            prc += item.prc
+        return prc
+
+    def get_weapon(self):
+        weapons = []
+        for item in self.items:
+            if item.item_type == "weapon":
+                weapons.append(item)
+        return weapons
 
     def is_dead(self):
         return self.health <= 0
