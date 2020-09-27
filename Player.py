@@ -3,11 +3,12 @@ from HelpFunctions import add_escapes
 
 class Player:
 
-    def __init__(self, name, gender, team_name, max_health=120, health=100, max_energy=100, energy=100):
+    def __init__(self, name, gender, team_name, victory_msg="", max_health=120, health=100, max_energy=100, energy=100):
         self.name = name
         self.esc_name = add_escapes(name)
         self.gender = gender
         self.team_name = team_name
+        self.victory_msg = victory_msg
         self.max_health = max_health
         self.health = health
         self.max_energy = max_energy

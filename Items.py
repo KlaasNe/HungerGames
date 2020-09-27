@@ -44,13 +44,6 @@ weapon_items = {
     ]
 }
 
-defence_items = [
-    Item("piece of wood", "armour", res=2, slot="hand"),
-    Item("fridge door", "armour", res=15, slot="2hand"),
-    Item("gucci shades", "armour", res=2, prc=20, slot="head"),
-    Item("medic helmet", "armour", res=10, slot="head")
-]
-
 
 class Items:
     weapons = weapon_items

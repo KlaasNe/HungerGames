@@ -20,11 +20,18 @@ class HungerGame:
 
     def init_players(self):
         players = []
-        for player_nr in range(self.distr * self.teamsize):
-            player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
-            player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
-            tribute_nr = player_nr // self.teamsize + 1
-            players.append(Player(player_name, player_gender, tribute_nr))
+        if self.distr * self.teamsize < 20:
+            for player_nr in range(self.distr * self.teamsize):
+                player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
+                player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
+                tribute_nr = player_nr // self.teamsize + 1
+                players.append(Player(player_name, player_gender, tribute_nr))
+        else:
+            for player_nr in range(self.distr * self.teamsize):
+                player_name = str(player_nr)
+                player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
+                tribute_nr = player_nr // self.teamsize + 1
+                players.append(Player(player_name, player_gender, tribute_nr))
         return players
 
     @staticmethod
@@ -99,7 +106,7 @@ class HungerGame:
             event = Events.twopl["help"][event_nr]
             self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
             print("🩹 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
-        elif randint(0, 3) == 0:
+        elif randint(0, 2) == 0:
             event_nr = randint(0, len(Events.twopl["fight"]) - 1)
             event = Events.twopl["fight"][event_nr]
             self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
@@ -144,7 +151,9 @@ class HungerGame:
         self.alive.remove(victim)
         if killer is not None:
             killer.kills += 1
-        print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
+            print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
+        else:
+            print("> ☠ {} is now  d e a d.".format(victim.to_esc_string()))
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -177,10 +186,13 @@ def main():
         if not game.finished():
             # enter()
             game.pass_night()
-        game.print_stats()
+        # game.print_stats()
 
-    print("\n|| winner(s): {} ||".format(str(game.players_to_esc_string(game.alive))) + "\n")
     game.print_kill_counts()
+    print("\nThe games have finally ended after {} days...".format(str(game.day_count)))
+    winners_msg = "\n|| winner(s): {} from {}, {}||"
+    winners = str(game.players_to_esc_string(game.alive))
+    print(winners_msg.format(winners, game.alive[0].team_name, game.alive[0].victory_msg))
 
     quit()
 
