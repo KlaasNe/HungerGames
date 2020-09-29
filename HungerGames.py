@@ -21,11 +21,15 @@ class HungerGame:
     def init_players(self):
         players = []
         if self.distr * self.teamsize < 20:
+            team_name = ""
+            victory_msg = ""
             for player_nr in range(self.distr * self.teamsize):
+                if player_nr % self.teamsize == 0:
+                    team_name = input("Teamname: ")
+                    victory_msg = input("Victory message: ")
                 player_name = input("Name tribute #{}\n> ".format(player_nr + 1))
                 player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
-                tribute_nr = player_nr // self.teamsize + 1
-                players.append(Player(player_name, player_gender, tribute_nr))
+                players.append(Player(player_name, player_gender, team_name, victory_msg))
         else:
             for player_nr in range(self.distr * self.teamsize):
                 player_name = str(player_nr)
@@ -176,21 +180,28 @@ class HungerGame:
             print("> {} has {} hp left.".format(player.to_string(), str(player.health)))
         print("```")
 
+    def print_teams(self):
+        for player_nr in range(0, self.players_live(), self.teamsize):
+            print("**" + self.alive[player_nr].team_name + "**")
+            for add in range(self.teamsize):
+                print("> " + self.alive[player_nr + add].to_string() + "\n")
+
 
 def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
     print(".")
+    game.print_teams()
     while not game.finished():
         # enter()
         game.pass_day()
         if not game.finished():
             # enter()
             game.pass_night()
-        # game.print_stats()
+        game.print_stats()
 
     game.print_kill_counts()
     print("\nThe games have finally ended after {} days...".format(str(game.day_count)))
-    winners_msg = "\n|| winner(s): {} from {}, {}||"
+    winners_msg = "\n|| winner(s): {} from {}; '{}'||"
     winners = str(game.players_to_esc_string(game.alive))
     print(winners_msg.format(winners, game.alive[0].team_name, game.alive[0].victory_msg))
 
