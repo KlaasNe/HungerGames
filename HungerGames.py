@@ -20,7 +20,7 @@ class HungerGame:
 
     def init_players(self):
         players = []
-        if self.distr * self.teamsize < 20:
+        if self.distr * self.teamsize < 99:
             team_name = ""
             victory_msg = ""
             for player_nr in range(self.distr * self.teamsize):
@@ -181,10 +181,12 @@ class HungerGame:
         print("```")
 
     def print_teams(self):
+        print("`Welcome to the {} teams.`\n".format(str(self.players_live()//self.teamsize)))
         for player_nr in range(0, self.players_live(), self.teamsize):
-            print("**" + self.alive[player_nr].team_name + "**")
+            print("\n")
+            print("**" + str(self.alive[player_nr].team_name) + "**")
             for add in range(self.teamsize):
-                print("> " + self.alive[player_nr + add].to_string() + "\n")
+                print("> " + self.alive[player_nr + add].to_string())
 
 
 def main():
