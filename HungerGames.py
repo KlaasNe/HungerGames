@@ -3,7 +3,6 @@ from random import randint
 from HelpFunctions import *
 from Player import Player
 from Events import Events
-from Items import Items
 
 
 class HungerGame:
@@ -63,7 +62,7 @@ class HungerGame:
         print("\n**Day {}**".format(self.day_count))
         event_count = 16
         event = 0
-        while event < event_count:
+        while event < event_count - 1:
             if not self.finished():
                 self.do_2player_event()
                 event += 1
@@ -78,7 +77,7 @@ class HungerGame:
         print("\n**Night {}**".format(self.day_count))
         event_count = 8
         event = 0
-        while event < event_count:
+        while event < event_count - 1:
             if not self.finished():
                 self.do_2player_event()
                 event += 1
@@ -93,12 +92,8 @@ class HungerGame:
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
         if randint(0, 2) == 0:
-            item_nr = randint(0, len(Items.weapons["melee"]) - 1)
-            item = Items.weapons["melee"][item_nr]
-            if len(player.items) == 0:
-                player.items.append(item)
-            else:
-                player.items[0] = item
+            player.give_weapon()
+            item = player.get_weapon()[0]
             print("❔ {} found an item: _{}_".format(player.to_esc_string(), item.name))
         else:
             event_nr = randint(0, len(Events.onepl["yes"]) - 1)
@@ -140,16 +135,13 @@ class HungerGame:
                 combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
                 print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), other_punches, self_punches))
 
-        player1.health += self_dmg
-        player2.health += other_dmg
-        if player1.health > player1.max_health:
-            player1.health = player1.max_health
-        if player2.health > player2.max_health:
-            player2.health = player2.max_health
+        self.do_dmg(player1, player2, self_dmg, other_dmg)
 
+    def do_dmg(self, player1, player2, dmg1, dmg2):
+        player1.take_dmg(dmg1)
+        player2.take_dmg(dmg2)
         if player1.is_dead():
             self.kill(player2, player1)
-
         if player2.is_dead():
             self.kill(player1, player2)
 
@@ -168,6 +160,9 @@ class HungerGame:
             print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
         else:
             print("> ☠ {} is now  d e a d.".format(victim.to_esc_string()))
+
+    def run_to_mid(self):
+        ...
 
     def finished(self):
         if len(self.alive) <= 1:

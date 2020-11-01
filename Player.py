@@ -1,9 +1,12 @@
+from random import randint
+
+import Items
 from HelpFunctions import add_escapes
 
 
 class Player:
 
-    def __init__(self, name, gender, team_name, victory_msg="", max_health=60, health=50, max_energy=100, energy=100):
+    def __init__(self, name, gender, team_name, victory_msg="", max_health=120, health=100, max_energy=100, energy=100):
         self.name = name
         self.esc_name = add_escapes(name)
         self.gender = gender
@@ -59,3 +62,16 @@ class Player:
 
     def to_info(self):
         return [self.name, self.health, self.energy, self.kills]
+
+    def give_weapon(self):
+        item_nr = randint(0, len(Items.weapons["melee"]) - 1)
+        item = Items.weapons["melee"][item_nr]
+        if len(self.items) == 0:
+            self.items.append(item)
+        else:
+            self.items[0] = item
+
+    def take_dmg(self, dmg):
+        self.health += dmg
+        if self.health > self.max_health:
+            self.health = self.max_health

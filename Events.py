@@ -18,7 +18,7 @@ one_player_actions = {
         Event("{} rests for a bit.", self_hp_delta=8),
         Event("{} cries of despair.", self_hp_delta=-5),
         Event("{} takes a bath in a hot water pond.", self_hp_delta=15),
-        Event("{} tries lighting a fire, but fails XD", self_hp_delta=-25)
+        Event("{} tries lighting a fire, but fails and set themself on fire.", self_hp_delta=-25)
     ]
 }
 

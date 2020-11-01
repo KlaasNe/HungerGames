@@ -15,7 +15,7 @@ class Weapon(Item):
         super().__init__(name, "weapon", dmg, res, hp, en, prc, slot)
 
 
-weapon_items = {
+weapons = {
     "melee": [
         Weapon("two handed axe", dmg=100, res=10, prc=-20, slot="2hand"),
         Weapon("two handed sword", dmg=80, res=15, prc=-15, slot="2hand"),
@@ -43,7 +43,3 @@ weapon_items = {
         Weapon("razorblades glued to a glove", dmg=32, prc=25, slot="hand")
     ]
 }
-
-
-class Items:
-    weapons = weapon_items
