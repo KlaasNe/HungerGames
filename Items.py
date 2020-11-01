@@ -40,6 +40,7 @@ weapons = {
         Weapon("heavy book", dmg=10, prc=-10, slot="hand"),
         Weapon("large army of living origami birds", dmg=19, prc=50),
         Weapon("guitar", dmg=18, slot="hand"),
-        Weapon("razorblades glued to a glove", dmg=32, prc=25, slot="hand")
+        Weapon("razorblades glued to a glove", dmg=32, prc=25, slot="hand"),
+        Weapon("big shield", dmg=20, res=30, prc=-5)
     ]
 }
