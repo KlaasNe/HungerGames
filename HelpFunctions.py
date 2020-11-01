@@ -1,3 +1,5 @@
+from random import randint
+
 SPECIAL_CHARS = ["*", "_", "~"]
 
 
@@ -24,3 +26,7 @@ def add_escapes(text):
             escaped_txt += "\\"
         escaped_txt += text[char]
     return escaped_txt
+
+
+def coinflip():
+    return randint(0, 1) == 0

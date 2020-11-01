@@ -1,9 +1,6 @@
-from random import randint
-
 from HelpFunctions import *
 from Player import Player
 from Events import Events
-from Items import Items
 
 
 class HungerGame:
@@ -53,7 +50,7 @@ class HungerGame:
     def players_to_esc_string(to_conv_list):
         str_list = []
         for player in to_conv_list:
-            str_list.append(player.to_esc_string())
+            str_list.append(player.to_esc_str())
         return ", ".join(str_list)
 
     def players_live(self):
@@ -63,7 +60,7 @@ class HungerGame:
         print("\n**Day {}**".format(self.day_count))
         event_count = 16
         event = 0
-        while event < event_count:
+        while event < event_count - 1:
             if not self.finished():
                 self.do_2player_event()
                 event += 1
@@ -78,7 +75,7 @@ class HungerGame:
         print("\n**Night {}**".format(self.day_count))
         event_count = 8
         event = 0
-        while event < event_count:
+        while event < event_count - 1:
             if not self.finished():
                 self.do_2player_event()
                 event += 1
@@ -93,17 +90,13 @@ class HungerGame:
     def do_1player_event(self):
         player = self.alive[randint(0, len(self.alive) - 1)]
         if randint(0, 2) == 0:
-            item_nr = randint(0, len(Items.weapons["melee"]) - 1)
-            item = Items.weapons["melee"][item_nr]
-            if len(player.items) == 0:
-                player.items.append(item)
-            else:
-                player.items[0] = item
-            print("❔ {} found an item: _{}_".format(player.to_esc_string(), item.name))
+            player.give_weapon()
+            item = player.get_weapon()[0]
+            print("❔ {} found an item: _{}_".format(player.to_esc_str(), item.name))
         else:
             event_nr = randint(0, len(Events.onepl["yes"]) - 1)
             event = Events.onepl["yes"][event_nr]
-            print("❕ " + event.description.format(player.to_esc_string()))
+            print("❕ " + event.description.format(player.to_esc_str()))
             player.health += event.self_hp_delta
             player.energy += event.self_energy_delta
 
@@ -119,37 +112,33 @@ class HungerGame:
             event_nr = randint(0, len(Events.twopl["help"]) - 1)
             event = Events.twopl["help"][event_nr]
             self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
-            print("🩹 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
+            print("🩹 " + event.description.format(player1.to_esc_str(), player2.to_esc_str()))
         elif randint(0, 2) == 0:
             event_nr = randint(0, len(Events.twopl["fight"]) - 1)
             event = Events.twopl["fight"][event_nr]
             self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
-            print("🥊 " + event.description.format(player1.to_esc_string(), player2.to_esc_string()))
+            print("🥊 " + event.description.format(player1.to_esc_str(), player2.to_esc_str()))
         else:
-            weapon = player1.get_weapon()
-            if weapon:
+            if player1.has_weapon():
                 weapon = player1.get_weapon()[0]
                 other_dmg = -player1.get_dmg()
                 self_dmg = 0
                 combat_txt = "⚔ " + "{} hits {} with a _{}_."
-                print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), weapon.name))
+                print(combat_txt.format(player1.to_esc_str(), player2.to_esc_str(), weapon.name))
             else:
                 slap_dmg = -4
                 other_punches, self_punches = randint(3, 6), randint(1, 4)
                 other_dmg, self_dmg = slap_dmg * other_punches, slap_dmg * self_punches
                 combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
-                print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), other_punches, self_punches))
+                print(combat_txt.format(player1.to_esc_str(), player2.to_esc_str(), other_punches, self_punches))
 
-        player1.health += self_dmg
-        player2.health += other_dmg
-        if player1.health > player1.max_health:
-            player1.health = player1.max_health
-        if player2.health > player2.max_health:
-            player2.health = player2.max_health
+        self.do_dmg(player1, player2, self_dmg, other_dmg)
 
+    def do_dmg(self, player1, player2, dmg1, dmg2):
+        player1.take_dmg(dmg1)
+        player2.take_dmg(dmg2)
         if player1.is_dead():
             self.kill(player2, player1)
-
         if player2.is_dead():
             self.kill(player1, player2)
 
@@ -165,9 +154,47 @@ class HungerGame:
         self.alive.remove(victim)
         if killer is not None:
             killer.kills += 1
-            print("> 💀 {} is now  d e a d.".format(victim.to_esc_string()))
+            print("> 💀 {} is now  d e a d.".format(victim.to_esc_str()))
         else:
-            print("> ☠ {} is now  d e a d.".format(victim.to_esc_string()))
+            print("> ☠ {} is now  d e a d.".format(victim.to_esc_str()))
+
+    def run_to_mid(self):
+        def random_mid_plr():
+            att = 0
+            rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
+            while rand_mid_plr.is_dead() or rand_mid_plr is player and att < 99:
+                rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
+                att += 1
+            return rand_mid_plr
+
+        def attack_mid_plr(attacker):
+            random_mid = random_mid_plr()
+            self.attack(attacker, random_mid)
+            if random_mid.is_dead():
+                self.kill(attacker, random_mid)
+
+        print("\n**BEGINNING**")
+        mid_players = []
+        for player in self.alive:
+            if coinflip():
+                mid_players.append(player)
+        for player in mid_players:
+            if not player.is_dead():
+                player.give_weapon()
+                txt = "❔ {} runs towards the middle and grabs a _{}_"
+                print(txt.format(player.to_esc_str(), player.get_weapon()[0].name))
+                attack_mid_plr(player)
+
+    @staticmethod
+    def attack(attacker, defender):
+        weapon = attacker.get_weapon()[0]
+        atk_txt = "⚔ {} hits {} with a _{}_."
+        print(atk_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name))
+        if defender.has_weapon():
+            def_weapon = defender.get_weapon()[0]
+            def_txt = "> 🛡️ {} tries to counter the attack of {} with their _{}_, blocking {} damage."
+            print(def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
+        defender.take_attack(attacker.get_dmg())
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -182,7 +209,7 @@ class HungerGame:
         players = self.alive + self.dead
         players.sort(key=lambda plyr: plyr.kills, reverse=True)
         for player in players:
-            print("{} has {} kills".format(player.to_esc_string(), str(player.kills)))
+            print("{} has {} kills".format(player.to_esc_str(), str(player.kills)))
 
     def print_stats(self):
         print("\n```\n❤ HP UPDATE ❤")
@@ -203,11 +230,10 @@ def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
     print(".")
     game.print_teams()
+    game.run_to_mid()
     while not game.finished():
-        # enter()
         game.pass_day()
         if not game.finished():
-            # enter()
             game.pass_night()
         game.print_stats()
 
