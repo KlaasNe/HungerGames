@@ -62,21 +62,31 @@ class HungerGame:
     def pass_day(self):
         print("\n**Day {}**".format(self.day_count))
         event_count = 16
-        for event in range(event_count // 2):
+        event = 0
+        while event < event_count:
             if not self.finished():
                 self.do_2player_event()
-            if not self.finished():
+                event += 1
+            else:
+                event = event_count
+            if not self.finished() and event % 2 == 0:
                 self.do_1player_event()
+                event += 1
         self.night = True
 
     def pass_night(self):
         print("\n**Night {}**".format(self.day_count))
         event_count = 8
-        for event in range(event_count // 2):
+        event = 0
+        while event < event_count:
             if not self.finished():
                 self.do_2player_event()
-            if not self.finished():
+                event += 1
+            else:
+                event = event_count
+            if not self.finished() and event % 2 == 0:
                 self.do_1player_event()
+                event += 1
         self.day_count += 1
         self.night = False
 
@@ -124,7 +134,7 @@ class HungerGame:
                 combat_txt = "⚔ " + "{} hits {} with a _{}_."
                 print(combat_txt.format(player1.to_esc_string(), player2.to_esc_string(), weapon.name))
             else:
-                slap_dmg = -3
+                slap_dmg = -4
                 other_punches, self_punches = randint(3, 6), randint(1, 4)
                 other_dmg, self_dmg = slap_dmg * other_punches, slap_dmg * self_punches
                 combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
@@ -205,7 +215,10 @@ def main():
     print("\nThe games have finally ended after {} days...".format(str(game.day_count)))
     winners_msg = "\n|| winner(s): {} from {}; '{}'||"
     winners = str(game.players_to_esc_string(game.alive))
-    print(winners_msg.format(winners, game.alive[0].team_name, game.alive[0].victory_msg))
+    if game.alive:
+        print(winners_msg.format(winners, game.alive[0].team_name, game.alive[0].victory_msg))
+    else:
+        print("Everyone died...")
 
     quit()
 
