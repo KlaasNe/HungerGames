@@ -2,6 +2,8 @@ from HelpFunctions import *
 from Player import Player
 from Events import Events
 
+from random import shuffle
+
 
 class HungerGame:
 
@@ -178,6 +180,7 @@ class HungerGame:
         for player in self.alive:
             if coinflip():
                 mid_players.append(player)
+        shuffle(mid_players)
         for player in mid_players:
             if not player.is_dead():
                 player.give_weapon()
