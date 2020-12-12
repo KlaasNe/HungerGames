@@ -1,8 +1,8 @@
+from random import shuffle
+
+from Events import Events
 from HelpFunctions import *
 from Player import Player
-from Events import Events
-
-from random import shuffle
 
 
 class HungerGame:
@@ -196,7 +196,8 @@ class HungerGame:
         if defender.has_weapon():
             def_weapon = defender.get_weapon()[0]
             def_txt = "> 🛡️ {} tries to counter the attack of {} with their _{}_, blocking {} damage."
-            print(def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
+            print(
+                def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
         defender.take_attack(attacker.get_dmg())
 
     def finished(self):
@@ -221,7 +222,7 @@ class HungerGame:
         print("```")
 
     def print_teams(self):
-        print("`Welcome to the {} teams.`\n".format(str(self.players_live()//self.teamsize)))
+        print("`Welcome to the {} teams.`\n".format(str(self.players_live() // self.teamsize)))
         for player_nr in range(0, self.players_live(), self.teamsize):
             print("\n")
             print("**" + str(self.alive[player_nr].team_name) + "**")
