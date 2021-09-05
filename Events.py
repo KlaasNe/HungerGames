@@ -1,6 +1,6 @@
 class Event:
 
-    def __init__(self, description, hp_req=0, self_hp_delta=0, other_hp_delta=0, energy_req=0, self_energy_delta=0, other_energy_delta=0, kills_req=0):
+    def __init__(self, description, hp_req=0, self_hp_delta=0, other_hp_delta=0, energy_req=0, self_energy_delta=0, other_energy_delta=0, kills_req=0, befriend_team=None):
         self.description = description
         self.hp_req = hp_req
         self.self_hp_delta = self_hp_delta
@@ -44,6 +44,11 @@ two_player_actions = {
     "misc": [
         Event("undefined event"),
         # Event("Steal item")
+    ],
+    "relations": [
+        Event("{} and {} are now friends with {} and {} from team {}."),
+        Event("{} betrays {} and joins {} and {} from team {}."),
+        Event("{} is no longer an ally of {}.")
     ]
 }
 
