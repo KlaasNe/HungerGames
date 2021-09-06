@@ -4,6 +4,9 @@ class Team:
         self.players = players
         self.allies = []
 
+    def get_name(self):
+        return self.name
+
     def get_players(self):
         return self.players
 
@@ -24,3 +27,6 @@ class Team:
 
     def has_as_ally(self, team):
         return team in self.get_allies()
+
+    def __eq__(self, other):
+        return self.get_name() == other.get_name()

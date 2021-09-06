@@ -3,6 +3,7 @@ from random import shuffle
 from Events import Events
 from HelpFunctions import *
 from Player import Player
+from Singleton import Singleton
 
 
 class HungerGame:
@@ -16,6 +17,7 @@ class HungerGame:
         self.alive = self.init_players()
         self.dead = []
         self.died_today = []
+        self.events = Singleton(Events)
 
     def init_players(self):
         players = []
@@ -55,7 +57,7 @@ class HungerGame:
             str_list.append(player.to_esc_str())
         return ", ".join(str_list)
 
-    def players_live(self):
+    def get_nb_players_alive(self):
         return len(self.alive)
 
     def pass_day(self):
@@ -112,7 +114,7 @@ class HungerGame:
         player1, player2 = self.select_2_players()
         if self.same_team(player1, player2):
             event_nr = randint(0, len(Events.twopl["help"]) - 1)
-            event = Events.twopl["help"][event_nr]
+            event =
             self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
             print("🩹 " + event.description.format(player1.to_esc_str(), player2.to_esc_str()))
         elif randint(0, 2) == 0:
@@ -145,10 +147,10 @@ class HungerGame:
             self.kill(player1, player2)
 
     def select_2_players(self):
-        player1 = self.alive[randint(0, self.players_live() - 1)]
-        player2 = self.alive[randint(0, self.players_live() - 1)]
+        player1 = self.alive[randint(0, self.get_nb_players_alive() - 1)]
+        player2 = self.alive[randint(0, self.get_nb_players_alive() - 1)]
         while player2.to_string() == player1.to_string():
-            player2 = self.alive[randint(0, self.players_live() - 1)]
+            player2 = self.alive[randint(0, self.get_nb_players_alive() - 1)]
         return player1, player2
 
     def kill(self, killer, victim):
@@ -222,8 +224,8 @@ class HungerGame:
         print("```")
 
     def print_teams(self):
-        print("`Welcome to the {} teams.`\n".format(str(self.players_live() // self.teamsize)))
-        for player_nr in range(0, self.players_live(), self.teamsize):
+        print("`Welcome to the {} teams.`\n".format(str(self.get_nb_players_alive() // self.teamsize)))
+        for player_nr in range(0, self.get_nb_players_alive(), self.teamsize):
             print("\n")
             print("**" + str(self.alive[player_nr].team_name) + "**")
             for add in range(self.teamsize):
