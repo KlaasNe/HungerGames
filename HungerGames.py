@@ -11,6 +11,7 @@ class HungerGame:
     def __init__(self, distr, teamsize, teamwin_allowed=True):
         self.distr = distr
         self.teamsize = teamsize
+        self.max_team_size = teamsize * 2
         self.teamwin_allowed = teamwin_allowed
         self.teams = set()
         self.day_count = 1
@@ -18,6 +19,7 @@ class HungerGame:
         self.alive = self.init_players()
         self.dead = []
         self.died_today = []
+        self.environmental_kills = 0
 
     def get_team(self, team_name):
         for team in self.teams:
@@ -156,20 +158,19 @@ class HungerGame:
 
     def do_2player_team_alter_event(self, p1, p2):
         event_chooser = randint(1, 3)
-        if event_chooser == 1:
+        tn1, tn2 = p1.team_name, p2.team_name
+        t1, t2 = self.get_team(tn1), self.get_team(tn2)
+        if t2.size() < self.max_team_size and event_chooser == 1:
             # betrayal
-            tn1, tn2 = p1.team_name, p2.team_name
-            t1, t2 = self.get_team(tn1), self.get_team(tn2)
             p1.team_name = p2.team_name
             t1.remove_player(p1)
+            t2.add_player(p1)
             t2_players = self.get_team_player_names(tn2)
             event = Events.twopl.RELATIONS.value[2]
             event_txt = event.description.format(p1.name, tn1, ', '.join(t2_players), tn2)
             print(event_txt)
         else:
             # change ally mode
-            tn1, tn2 = p1.team_name, p2.team_name
-            t1, t2 = self.get_team(tn1), self.get_team(tn2)
             if t1.has_as_ally(t2):
                 t1.remove_ally(t2)
                 t2.remove_ally(t1)
@@ -178,16 +179,16 @@ class HungerGame:
                 t1.add_ally(t2)
                 t2.add_ally(t1)
                 event = Events.twopl.RELATIONS.value[0]
-            event_txt = event.description.format(t1, t2)
+            event_txt = event.description.format(tn1, tn2)
             print(event_txt)
 
     def do_2player_diff_team_event(self, p1, p2):
         event_chooser = randint(1, 20)
         if event_chooser == 1:
-            return HungerGame.do_2player_attack_event(p1, p2)
-        else:
             self.do_2player_team_alter_event(p1, p2)
             return 0, 0
+        else:
+            return HungerGame.do_2player_attack_event(p1, p2)
 
     def do_dmg(self, player1, player2, dmg1, dmg2):
         player1.take_dmg(dmg1)
@@ -211,6 +212,7 @@ class HungerGame:
             killer.kills += 1
             print("> 💀 {} is now  d e a d.".format(victim.to_esc_str()))
         else:
+            self.environmental_kills += 1
             print("> ☠ {} is now  d e a d.".format(victim.to_esc_str()))
 
     def run_to_mid(self):
@@ -268,6 +270,7 @@ class HungerGame:
         players.sort(key=lambda plyr: plyr.kills, reverse=True)
         for player in players:
             print("{} has {} kills".format(player.to_esc_str(), str(player.kills)))
+        print("and {} people killed because of their own stupidity.".format(self.environmental_kills))
 
     def print_stats(self):
         print("\n```\n❤ HP UPDATE ❤")
@@ -296,7 +299,7 @@ def main():
         game.print_stats()
 
     game.print_kill_counts()
-    print("\nThe games have finally ended after {} days...".format(str(game.day_count)))
+    print("\n\nThe games have finally ended after {} days...".format(str(game.day_count)))
     winners_msg = "\n|| winner(s): {} from {}; '{}'||"
     winners = str(game.players_to_esc_string(game.alive))
     if game.alive:

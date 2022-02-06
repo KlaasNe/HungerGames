@@ -40,7 +40,7 @@ class TwoPlayerEvents(Enum):
     RELATIONS = [
         Event("🧑‍🤝‍🧑 Team _{}_ are now friends with team _{}_."),
         Event("🧑‍🤝‍🧑 Team _{}_ is no longer an ally of team _{}_."),
-        Event("👨‍👩‍👦 _{}_ betrays _{}_ and joins {} from team _{}_.")
+        Event("🖕 _{}_ betrays _{}_ and joins {} from team _{}_.")
     ]
     MISC = [
         Event("Undefined event"),
