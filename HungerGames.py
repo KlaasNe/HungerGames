@@ -3,7 +3,6 @@ from random import shuffle
 from Events import Events
 from HelpFunctions import *
 from Player import Player
-from Singleton import Singleton
 
 
 class HungerGame:
@@ -17,7 +16,6 @@ class HungerGame:
         self.alive = self.init_players()
         self.dead = []
         self.died_today = []
-        self.events = Singleton(Events)
 
     def init_players(self):
         players = []
@@ -98,8 +96,8 @@ class HungerGame:
             item = player.get_weapon()[0]
             print("❔ {} found an item: _{}_".format(player.to_esc_str(), item.name))
         else:
-            event_nr = randint(0, len(Events.onepl["yes"]) - 1)
-            event = Events.onepl["yes"][event_nr]
+            event_nr = randint(0, len(Events.onepl.MISC.value) - 1)
+            event = Events.onepl.MISC.value[event_nr]
             print("❕ " + event.description.format(player.to_esc_str()))
             player.health += event.self_hp_delta
             player.energy += event.self_energy_delta
@@ -113,30 +111,34 @@ class HungerGame:
     def do_2player_event(self):
         player1, player2 = self.select_2_players()
         if self.same_team(player1, player2):
-            event_nr = randint(0, len(Events.twopl["help"]) - 1)
-            event =
-            self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
-            print("🩹 " + event.description.format(player1.to_esc_str(), player2.to_esc_str()))
-        elif randint(0, 2) == 0:
-            event_nr = randint(0, len(Events.twopl["fight"]) - 1)
-            event = Events.twopl["fight"][event_nr]
-            self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
-            print("🥊 " + event.description.format(player1.to_esc_str(), player2.to_esc_str()))
+            self_dmg, other_dmg = HungerGame.do_2player_same_team_event(player1, player2)
         else:
-            if player1.has_weapon():
-                weapon = player1.get_weapon()[0]
-                other_dmg = -player1.get_dmg()
-                self_dmg = 0
-                combat_txt = "⚔ " + "{} hits {} with a _{}_."
-                print(combat_txt.format(player1.to_esc_str(), player2.to_esc_str(), weapon.name))
-            else:
-                slap_dmg = -4
-                other_punches, self_punches = randint(3, 6), randint(1, 4)
-                other_dmg, self_dmg = slap_dmg * other_punches, slap_dmg * self_punches
-                combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
-                print(combat_txt.format(player1.to_esc_str(), player2.to_esc_str(), other_punches, self_punches))
-
+            self_dmg, other_dmg = HungerGame.do_2player_diff_team_event(player1, player2)
         self.do_dmg(player1, player2, self_dmg, other_dmg)
+
+    @staticmethod
+    def do_2player_same_team_event(p1, p2):
+        event_nr = randint(0, len(Events.twopl.HELP.value) - 1)
+        event = Events.twopl.HELP.value[event_nr]
+        self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
+        print("🩹 " + event.description.format(p1.to_esc_str(), p2.to_esc_str()))
+        return self_dmg, other_dmg
+
+    @staticmethod
+    def do_2player_diff_team_event(p1, p2):
+        if p1.has_weapon():
+            weapon = p1.get_weapon()[0]
+            other_dmg = -p1.get_dmg()
+            self_dmg = 0
+            combat_txt = "⚔ " + "{} hits {} with a _{}_."
+            print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), weapon.name))
+        else:
+            slap_dmg = -4
+            other_punches, self_punches = randint(3, 6), randint(1, 4)
+            other_dmg, self_dmg = slap_dmg * other_punches, slap_dmg * self_punches
+            combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
+            print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), other_punches, self_punches))
+        return self_dmg, other_dmg
 
     def do_dmg(self, player1, player2, dmg1, dmg2):
         player1.take_dmg(dmg1)
@@ -166,9 +168,10 @@ class HungerGame:
         def random_mid_plr():
             att = 0
             rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
-            while rand_mid_plr.is_dead() or rand_mid_plr is player and att < 99:
-                rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
-                att += 1
+            if len(mid_players) > 1:
+                while (rand_mid_plr.is_dead() or rand_mid_plr == player) and att < 99:
+                    rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
+                    att += 1
             return rand_mid_plr
 
         def attack_mid_plr(attacker):

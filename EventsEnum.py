@@ -1,6 +1,6 @@
 from enum import Enum
 
-from Events import Event
+from Event import Event
 
 
 class OnePlayerEvents(Enum):
@@ -43,6 +43,6 @@ class TwoPlayerEvents(Enum):
         Event("{} is no longer an ally of {}.")
     ]
     MISC = [
-        Event("undefined event"),
+        Event("Undefined event"),
         # Event("Steal item")
     ]
