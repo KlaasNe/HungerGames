@@ -11,6 +11,7 @@ class Player:
         self.esc_name = add_escapes(name)
         self.gender = gender
         self.team_name = team_name
+        self.origin_team = team_name
         self.victory_msg = victory_msg
         self.max_health = max_health
         self.health = health
@@ -86,3 +87,9 @@ class Player:
     def no_hp_overflow(self):
         if self.health > self.max_health:
             self.health = self.max_health
+
+    def same_team(self, other):
+        return self.team_name == other.team_name
+
+    def __str__(self):
+        return self.name

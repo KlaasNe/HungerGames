@@ -38,11 +38,12 @@ class TwoPlayerEvents(Enum):
         # Event("{} feeds {}.", other_energy_delta=60, self_energy_delta=60)
     ]
     RELATIONS = [
-        Event("{} and {} are now friends with {} and {} from team {}."),
-        Event("{} betrays {} and joins {} and {} from team {}."),
-        Event("{} is no longer an ally of {}.")
+        Event("🧑‍🤝‍🧑 Team _{}_ are now friends with team _{}_."),
+        Event("🧑‍🤝‍🧑 Team _{}_ is no longer an ally of team _{}_."),
+        Event("🖕 _{}_ betrays _{}_ and joins {} from team _{}_."),
+        Event("↩ As the last player fighting for _{}_, _{}_ decides to fight for their dead, original team.")
     ]
     MISC = [
         Event("Undefined event"),
-        # Event("Steal item")
+        # Event("{} steals {} their {} while they're sleaping.")
     ]
