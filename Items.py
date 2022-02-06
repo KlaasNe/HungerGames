@@ -24,8 +24,8 @@ weapons = {
         Weapon("basic knife", dmg=15, prc=10, slot="hand"),
         Weapon("butterfly knife", dmg=20, prc=9, slot="hand"),
         Weapon("sock with rocks", dmg=10, prc=-5, slot="hand"),
-        Weapon("blue lightsaber", dmg=70, res=-10, prc=10, slot="2hand"),
-        Weapon("green lightsaber", dmg=70, res=-10, prc=10, slot="2hand"),
+        Weapon("blue lightsaber", dmg=70, res=10, prc=10, slot="2hand"),
+        Weapon("green lightsaber", dmg=70, res=10, prc=10, slot="2hand"),
         Weapon("katana", dmg=40, prc=50, slot="2hand"),
         Weapon("spear", dmg=30, prc=40, slot="2hand"),
         Weapon("pointy shield", dmg=20, prc=-15, res=20, slot="hand"),
@@ -41,6 +41,6 @@ weapons = {
         Weapon("large army of living origami birds", dmg=19, prc=50),
         Weapon("guitar", dmg=18, slot="hand"),
         Weapon("razorblades glued to a glove", dmg=32, prc=25, slot="hand"),
-        Weapon("big shield", dmg=20, res=30, prc=-5)
+        Weapon("big shield", dmg=20, res=30, prc=-5, slot="2hand")
     ]
 }
