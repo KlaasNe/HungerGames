@@ -24,6 +24,7 @@ class HungerGame:
         self.alliances_formed = 0
         self.ally_dmg_prevent = 0
         self.alliances_broken = 0
+        self.damage_blocked = 0
 
     def init_players(self):
         players = []
@@ -260,17 +261,17 @@ class HungerGame:
         def random_mid_plr():
             att = 0
             rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
-            if len(mid_players) > 1:
-                while (rand_mid_plr.is_dead() or rand_mid_plr == player) and att < 99:
-                    rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
-                    att += 1
+            while (rand_mid_plr.is_dead() or rand_mid_plr == player) and att < 99:
+                rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
+                att += 1
             return rand_mid_plr
 
         def attack_mid_plr(attacker):
-            random_mid = random_mid_plr()
-            self.attack(attacker, random_mid)
-            if random_mid.is_dead():
-                self.kill(attacker, random_mid)
+            if len(mid_players) > 1:
+                random_mid = random_mid_plr()
+                self.attack(attacker, random_mid)
+                if random_mid.is_dead():
+                    self.kill(attacker, random_mid)
 
         print("\n**BEGINNING**")
         mid_players = []
@@ -285,8 +286,7 @@ class HungerGame:
                 print(txt.format(player.to_esc_str(), player.get_weapon()[0].name))
                 attack_mid_plr(player)
 
-    @staticmethod
-    def attack(attacker, defender):
+    def attack(self, attacker, defender):
         weapon = attacker.get_weapon()[0]
         atk_txt = "⚔ {} hits {} with a _{}_."
         print(atk_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name))
@@ -295,6 +295,7 @@ class HungerGame:
             def_txt = "> 🛡️ {} tries to counter the attack of {} with their _{}_, blocking {} damage."
             print(
                 def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
+            self.damage_blocked += defender.get_res()
         defender.take_attack(attacker.get_dmg())
 
     def finished(self):
@@ -328,8 +329,8 @@ class HungerGame:
                 print("> " + self.alive[player_nr + add].to_string())
 
     def print_fun_info(self):
-        print("\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
-            self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
+        print("\nDamage blocked: {}\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
+            self.damage_blocked, self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
         ))
 
 
@@ -342,7 +343,7 @@ def main():
         game.pass_day()
         if not game.finished():
             game.pass_night()
-        # game.print_stats()
+        game.print_stats()
 
     game.print_kill_counts()
     game.print_fun_info()
