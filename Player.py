@@ -90,3 +90,6 @@ class Player:
 
     def same_team(self, other):
         return self.team_name == other.team_name
+
+    def __str__(self):
+        return self.name

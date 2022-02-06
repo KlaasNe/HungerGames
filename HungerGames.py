@@ -165,9 +165,9 @@ class HungerGame:
             p1.team_name = p2.team_name
             t1.remove_player(p1)
             t2.add_player(p1)
-            t2_players = self.get_team_player_names(tn2)
+            t2_players = t2.get_alive()
             event = Events.twopl.RELATIONS.value[2]
-            event_txt = event.description.format(p1.name, tn1, ', '.join(t2_players), tn2)
+            event_txt = event.description.format(p1.name, tn1, ', '.join(str(p) for p in t2_players), tn2)
             print(event_txt)
         else:
             # change ally mode
@@ -205,7 +205,18 @@ class HungerGame:
             player2 = self.alive[randint(0, self.get_nb_players_alive() - 1)]
         return player1, player2
 
+    def check_traitor(self, team_name):
+        team = self.get_team(team_name)
+        if team.size_alive() == 1:
+            last_of_team = team.get_alive()[0]
+            last_origin_team = last_of_team.origin_team
+            if last_of_team.team_name != last_origin_team and self.get_team(last_origin_team).size_alive() == 0:
+                event = Events.twopl.RELATIONS.value[3]
+                event_txt = event.description.format(team_name, last_of_team.name)
+                print(event_txt)
+
     def kill(self, killer, victim):
+        self.check_traitor(victim.team_name)
         self.dead.append(victim)
         self.alive.remove(victim)
         if killer is not None:
@@ -270,7 +281,7 @@ class HungerGame:
         players.sort(key=lambda plyr: plyr.kills, reverse=True)
         for player in players:
             print("{} has {} kills".format(player.to_esc_str(), str(player.kills)))
-        print("and {} people killed because of their own stupidity.".format(self.environmental_kills))
+        print("and... {} people killed because of their own stupidity.".format(self.environmental_kills))
 
     def print_stats(self):
         print("\n```\n❤ HP UPDATE ❤")
@@ -300,10 +311,11 @@ def main():
 
     game.print_kill_counts()
     print("\n\nThe games have finally ended after {} days...".format(str(game.day_count)))
-    winners_msg = "\n|| winner(s): {} from {}; '{}'||"
+    winners_msg = "\n|| winner(s): {} fighting for {}; '{}'||"
     winners = str(game.players_to_esc_string(game.alive))
     if game.alive:
-        print(winners_msg.format(winners, game.alive[0].team_name, game.alive[0].victory_msg))
+        last_team = game.alive[0].team_name
+        print(winners_msg.format(winners, last_team, game.get_team(last_team).victory_msg))
     else:
         print("Everyone died...")
 
