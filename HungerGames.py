@@ -20,19 +20,14 @@ class HungerGame:
         self.dead = []
         self.died_today = []
         self.environmental_kills = 0
-
-    def get_team(self, team_name):
-        for team in self.teams:
-            if team.name == team_name:
-                return team
-        return None
-
-    def get_team_player_names(self, team_name):
-        return [player.name for player in self.get_team(team_name).players]
+        self.betrayals = 0
+        self.alliances_formed = 0
+        self.ally_dmg_prevent = 0
+        self.alliances_broken = 0
 
     def init_players(self):
         players = []
-        if self.distr * self.teamsize < 99:
+        if self.distr * self.teamsize < 9:
             team_name = ""
             victory_msg = ""
             curr_team = None
@@ -56,6 +51,22 @@ class HungerGame:
                 curr_team = Team(team_nr)
                 self.teams.add(curr_team)
         return players
+
+    def get_team(self, team_name):
+        for team in self.teams:
+            if team.name == team_name:
+                return team
+        return None
+
+    def get_team_player_names(self, team_name):
+        return [player.name for player in self.get_team(team_name).players]
+
+    def teams_alive(self):
+        alive = 0
+        for team in self.teams:
+            if team.size_alive() > 0:
+                alive += 1
+        return alive
 
     @staticmethod
     def players_to_string(to_conv_list):
@@ -140,8 +151,14 @@ class HungerGame:
         print("🩹 " + event.description.format(p1.to_esc_str(), p2.to_esc_str()))
         return self_dmg, other_dmg
 
-    @staticmethod
-    def do_2player_attack_event(p1, p2):
+    def do_2player_attack_event(self, p1, p2):
+        if self.get_team(p1.team_name).has_ally(self.get_team(p2.team_name)):
+            if randint(1, 3) != 1:
+                if self.teams_alive() > 2:
+                    while self.get_team(p2.team_name).has_ally(p1):
+                        p2 = self.select_2_players()[0]
+                    self.ally_dmg_prevent += 1
+
         if p1.has_weapon():
             weapon = p1.get_weapon()[0]
             other_dmg = -p1.get_dmg()
@@ -154,6 +171,16 @@ class HungerGame:
             other_dmg, self_dmg = SLAP_DMG * other_punches, SLAP_DMG * self_punches
             combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
             print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), other_punches, self_punches))
+
+        if self.get_team(p1.team_name).has_ally(self.get_team(p2.team_name)):
+            tn1, tn2 = p1.team_name, p2.team_name
+            t1, t2 = self.get_team(tn1), self.get_team(tn2)
+            t1.remove_ally(t2)
+            t2.remove_ally(t1)
+            event = Events.twopl.RELATIONS.value[1]
+            event_txt = event.description.format(tn1, tn2)
+            print(event_txt)
+            self.alliances_broken += 1
         return self_dmg, other_dmg
 
     def do_2player_team_alter_event(self, p1, p2):
@@ -169,26 +196,29 @@ class HungerGame:
             event = Events.twopl.RELATIONS.value[2]
             event_txt = event.description.format(p1.name, tn1, ', '.join(str(p) for p in t2_players), tn2)
             print(event_txt)
+            self.betrayals += 1
         else:
             # change ally mode
-            if t1.has_as_ally(t2):
+            if t1.has_ally(t2):
                 t1.remove_ally(t2)
                 t2.remove_ally(t1)
                 event = Events.twopl.RELATIONS.value[1]
+                self.alliances_broken += 1
             else:
                 t1.add_ally(t2)
                 t2.add_ally(t1)
                 event = Events.twopl.RELATIONS.value[0]
+                self.alliances_formed += 1
             event_txt = event.description.format(tn1, tn2)
             print(event_txt)
 
     def do_2player_diff_team_event(self, p1, p2):
-        event_chooser = randint(1, 20)
+        event_chooser = randint(1, 12)
         if event_chooser == 1:
             self.do_2player_team_alter_event(p1, p2)
             return 0, 0
         else:
-            return HungerGame.do_2player_attack_event(p1, p2)
+            return self.do_2player_attack_event(p1, p2)
 
     def do_dmg(self, player1, player2, dmg1, dmg2):
         player1.take_dmg(dmg1)
@@ -297,6 +327,11 @@ class HungerGame:
             for add in range(self.teamsize):
                 print("> " + self.alive[player_nr + add].to_string())
 
+    def print_fun_info(self):
+        print("\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
+            self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
+        ))
+
 
 def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
@@ -307,9 +342,10 @@ def main():
         game.pass_day()
         if not game.finished():
             game.pass_night()
-        game.print_stats()
+        # game.print_stats()
 
     game.print_kill_counts()
+    game.print_fun_info()
     print("\n\nThe games have finally ended after {} days...".format(str(game.day_count)))
     winners_msg = "\n|| winner(s): {} fighting for {}; '{}'||"
     winners = str(game.players_to_esc_string(game.alive))

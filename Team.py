@@ -33,7 +33,7 @@ class Team:
         except KeyError:
             pass
 
-    def has_as_ally(self, team):
+    def has_ally(self, team):
         return team in self.allies
 
     def size(self):
