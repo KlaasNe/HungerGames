@@ -28,7 +28,7 @@ class HungerGame:
 
     def init_players(self):
         players = []
-        if self.distr * self.teamsize < 9:
+        if self.distr * self.teamsize < 100:
             team_name = ""
             victory_msg = ""
             curr_team = None
@@ -87,7 +87,7 @@ class HungerGame:
         return len(self.alive)
 
     def pass_day(self):
-        print("\n**Day {}**".format(self.day_count))
+        print("\n**D A Y {}**".format(self.day_count))
         event_count = 16
         event = 0
         while event < event_count - 1:
@@ -102,7 +102,7 @@ class HungerGame:
         self.night = True
 
     def pass_night(self):
-        print("\n**Night {}**".format(self.day_count))
+        print("\n**N I G H T {}**".format(self.day_count))
         event_count = 8
         event = 0
         while event < event_count - 1:
@@ -122,7 +122,7 @@ class HungerGame:
         if randint(0, 2) == 0:
             player.give_weapon()
             item = player.get_weapon()[0]
-            print("❔ {} found an item: _{}_".format(player.to_esc_str(), item.name))
+            print("❔ **{}** found an item: _{}_".format(player.to_esc_str(), item.name))
         else:
             event_nr = randint(0, len(Events.onepl.MISC.value) - 1)
             event = Events.onepl.MISC.value[event_nr]
@@ -164,13 +164,13 @@ class HungerGame:
             weapon = p1.get_weapon()[0]
             other_dmg = -p1.get_dmg()
             self_dmg = 0
-            combat_txt = "⚔ " + "{} hits {} with a _{}_."
+            combat_txt = "⚔ " + "**{}** hits **{}** with a _{}_."
             print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), weapon.name))
         else:
             SLAP_DMG = -4
             other_punches, self_punches = randint(3, 6), randint(1, 4)
             other_dmg, self_dmg = SLAP_DMG * other_punches, SLAP_DMG * self_punches
-            combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
+            combat_txt = "👊 " + "**{}** hits **{}** {} times and gets hit {} times themselves."
             print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), other_punches, self_punches))
 
         if self.get_team(p1.team_name).has_ally(self.get_team(p2.team_name)):
@@ -189,13 +189,13 @@ class HungerGame:
         tn1, tn2 = p1.team_name, p2.team_name
         t1, t2 = self.get_team(tn1), self.get_team(tn2)
         if t2.size() < self.max_team_size and event_chooser == 1:
+            t2_players = t2.get_alive()
+            event = Events.twopl.RELATIONS.value[2]
+            event_txt = event.description.format(p1.name, tn1, ', '.join(str(p) for p in t2_players), tn2)
             # betrayal
             p1.team_name = p2.team_name
             t1.remove_player(p1)
             t2.add_player(p1)
-            t2_players = t2.get_alive()
-            event = Events.twopl.RELATIONS.value[2]
-            event_txt = event.description.format(p1.name, tn1, ', '.join(str(p) for p in t2_players), tn2)
             print(event_txt)
             self.betrayals += 1
         else:
@@ -282,17 +282,17 @@ class HungerGame:
         for player in mid_players:
             if not player.is_dead():
                 player.give_weapon()
-                txt = "❔ {} runs towards the middle and grabs a _{}_"
+                txt = "❔ **{}** runs towards the middle and grabs a _{}_"
                 print(txt.format(player.to_esc_str(), player.get_weapon()[0].name))
                 attack_mid_plr(player)
 
     def attack(self, attacker, defender):
         weapon = attacker.get_weapon()[0]
-        atk_txt = "⚔ {} hits {} with a _{}_."
+        atk_txt = "⚔ **{}** hits **{}** with a _{}_."
         print(atk_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name))
         if defender.has_weapon():
             def_weapon = defender.get_weapon()[0]
-            def_txt = "> 🛡️ {} tries to counter the attack of {} with their _{}_, blocking {} damage."
+            def_txt = "> 🛡️ **{}** tries to counter the attack of **{}** with their _{}_, blocking {} damage."
             print(
                 def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
             self.damage_blocked += defender.get_res()
@@ -348,7 +348,7 @@ def main():
     game.print_kill_counts()
     game.print_fun_info()
     print("\n\nThe games have finally ended after {} days...".format(str(game.day_count)))
-    winners_msg = "\n|| winner(s): {} fighting for {}; '{}'||"
+    winners_msg = "\n|| winner(s): **{}** fighting for {}; '_{}_'||"
     winners = str(game.players_to_esc_string(game.alive))
     if game.alive:
         last_team = game.alive[0].team_name
