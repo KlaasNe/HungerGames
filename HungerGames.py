@@ -4,11 +4,12 @@ from Events import Events
 from HelpFunctions import *
 from Player import Player
 from Team import Team
+import parser as inputs
 
 
 class HungerGame:
 
-    def __init__(self, distr, teamsize, teamwin_allowed=True):
+    def __init__(self, distr, teamsize, teamwin_allowed=True, debug=False):
         self.distr = distr
         self.teamsize = teamsize
         self.max_team_size = teamsize * 2
@@ -16,7 +17,7 @@ class HungerGame:
         self.teams = set()
         self.day_count = 1
         self.night = False
-        self.alive = self.init_players()
+        self.alive = self.init_players(debug=debug)
         self.dead = []
         self.died_today = []
         self.environmental_kills = 0
@@ -26,9 +27,17 @@ class HungerGame:
         self.alliances_broken = 0
         self.damage_blocked = 0
 
-    def init_players(self):
+    def init_players(self, debug=False):
         players = []
-        if self.distr * self.teamsize < 100:
+        if debug:
+            for player_nr in range(self.distr * self.teamsize):
+                player_name = str(player_nr // self.teamsize + 1) + "-" + str(player_nr % self.teamsize + 1)
+                player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
+                team_nr = player_nr // self.teamsize + 1
+                players.append(Player(player_name, player_gender, team_nr))
+                curr_team = Team(team_nr)
+                self.teams.add(curr_team)
+        else:
             team_name = ""
             victory_msg = ""
             curr_team = None
@@ -43,14 +52,6 @@ class HungerGame:
                 player = Player(player_name, player_gender, team_name, victory_msg)
                 players.append(player)
                 curr_team.add_player(player)
-        else:
-            for player_nr in range(self.distr * self.teamsize):
-                player_name = str(player_nr // self.teamsize + 1) + "-" + str(player_nr % 2 + 1)
-                player_gender = "x"  # input("Gender tribute (m/f/x)\n> ")
-                team_nr = player_nr // self.teamsize + 1
-                players.append(Player(player_name, player_gender, team_nr))
-                curr_team = Team(team_nr)
-                self.teams.add(curr_team)
         return players
 
     def get_team(self, team_name):
@@ -87,7 +88,7 @@ class HungerGame:
         return len(self.alive)
 
     def pass_day(self):
-        print("\n**D A Y {}**".format(self.day_count))
+        print("\n**D A Y  {}**".format(self.day_count))
         event_count = 16
         event = 0
         while event < event_count - 1:
@@ -102,7 +103,7 @@ class HungerGame:
         self.night = True
 
     def pass_night(self):
-        print("\n**N I G H T {}**".format(self.day_count))
+        print("\n**N I G H T  {}**".format(self.day_count))
         event_count = 8
         event = 0
         while event < event_count - 1:
@@ -260,9 +261,9 @@ class HungerGame:
     def run_to_mid(self):
         def random_mid_plr():
             att = 0
-            rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
-            while (rand_mid_plr.is_dead() or rand_mid_plr == player) and att < 99:
-                rand_mid_plr = mid_players[randint(0, len(mid_players) - 1)]
+            rand_mid_plr = list(mid_players)[randint(0, len(mid_players) - 1)]
+            while (rand_mid_plr.is_dead() or rand_mid_plr == player or player.same_team(rand_mid_plr)) and att < 99:
+                rand_mid_plr = list(mid_players)[randint(0, len(mid_players) - 1)]
                 att += 1
             return rand_mid_plr
 
@@ -274,11 +275,10 @@ class HungerGame:
                     self.kill(attacker, random_mid)
 
         print("\n**BEGINNING**")
-        mid_players = []
+        mid_players = set()
         for player in self.alive:
             if coinflip():
-                mid_players.append(player)
-        shuffle(mid_players)
+                mid_players.add(player)
         for player in mid_players:
             if not player.is_dead():
                 player.give_weapon()
@@ -335,7 +335,9 @@ class HungerGame:
 
 
 def main():
-    game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "))
+    parser = inputs.make_parser()
+    args = parser.parse_args()
+    game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "), debug=args.debug)
     print(".")
     game.print_teams()
     game.run_to_mid()
