@@ -33,14 +33,17 @@ weapons = {
         Weapon("lamp on a stick", dmg=10, res=5, slot="hand"),
         Weapon("shovel", dmg=30, res=10, slot="2hand"),
         Weapon("diamond sword", dmg=60, res=20, prc=-5, slot="hand"),
-        Weapon("large cactuss", dmg=17, prc=-5, slot="hand"),
-        Weapon("shit stick", dmg=10, slot="hand"),
+        Weapon("large cactus", dmg=17, prc=-5, slot="hand"),
+        Weapon("big stick", dmg=10, slot="hand"),
         Weapon("whip", dmg=20, prc=15, slot="hand"),
         Weapon("very very big spoon", dmg=30, res=10, slot="2hand"),
         Weapon("heavy book", dmg=10, prc=-10, slot="hand"),
         Weapon("large army of living origami birds", dmg=19, prc=50),
         Weapon("guitar", dmg=18, slot="hand"),
-        Weapon("razorblades glued to a glove", dmg=32, prc=25, slot="hand"),
-        Weapon("big shield", dmg=20, res=30, prc=-5, slot="2hand")
+        Weapon("big shield", dmg=20, res=30, prc=-5, slot="2hand"),
+        Weapon("'The Goth Girl Dissector'", dmg=25, prc=10, slot="hand"),
+        Weapon("broken bottle", dmg=15, prc=8, slot="hand"),
+        Weapon("unidentified broken bone", dmg=20, prc=12, slot="hand"),
+        Weapon("Sledgehammer", dmg=50, prc=-25, slot="2hand")
     ]
 }

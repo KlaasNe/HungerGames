@@ -1,5 +1,3 @@
-from random import shuffle
-
 from Events import Events
 from HelpFunctions import *
 from Player import Player
@@ -84,11 +82,18 @@ class HungerGame:
             str_list.append(player.to_esc_str())
         return ", ".join(str_list)
 
+    @staticmethod
+    def write_to_file(text: str) -> None:
+        with open("hungerGame.txt", "a") as file:
+            file.write(f"\n{text}")
+            file.close()
+
     def get_nb_players_alive(self):
         return len(self.alive)
 
     def pass_day(self):
-        print("\n**D A Y  {}**".format(self.day_count))
+        print(f"\n**D A Y  {self.day_count}**")
+        HungerGame.write_to_file(f"\nD A Y  {self.day_count}")
         event_count = 16
         event = 0
         while event < event_count - 1:
@@ -103,7 +108,8 @@ class HungerGame:
         self.night = True
 
     def pass_night(self):
-        print("\n**N I G H T  {}**".format(self.day_count))
+        print(f"\n**N I G H T  {self.day_count}**")
+        HungerGame.write_to_file(f"\nN I G H T  {self.day_count}")
         event_count = 8
         event = 0
         while event < event_count - 1:
@@ -123,11 +129,13 @@ class HungerGame:
         if randint(0, 2) == 0:
             player.give_weapon()
             item = player.get_weapon()[0]
-            print("❔ **{}** found an item: _{}_".format(player.to_esc_str(), item.name))
+            print("❔ **{}** found an item: _{}_.".format(player.to_esc_str(), item.name))
+            HungerGame.write_to_file(f"❔ {player.to_string()} found an item: {item.name}.")
         else:
             event_nr = randint(0, len(Events.onepl.MISC.value) - 1)
             event = Events.onepl.MISC.value[event_nr]
             print("❕ " + event.description.format(player.to_esc_str()))
+            HungerGame.write_to_file("❕ " + event.description.format(player.to_string()))
             player.health += event.self_hp_delta
             player.energy += event.self_energy_delta
 
@@ -151,37 +159,45 @@ class HungerGame:
         event = Events.twopl.HELP.value[event_nr]
         self_dmg, other_dmg = event.self_hp_delta, event.other_hp_delta
         print("🩹 " + event.description.format(p1.to_esc_str(), p2.to_esc_str()))
+        HungerGame.write_to_file("🩹 " + event.description.format(p1.to_string(), p2.to_string()))
         return self_dmg, other_dmg
 
-    def do_2player_attack_event(self, p1, p2):
-        if self.get_team(p1.team_name).has_ally(self.get_team(p2.team_name)):
+    def do_2player_attack_event(self, attacker, defender):
+        if self.get_team(attacker.team_name).has_ally(self.get_team(defender.team_name)):
             if randint(1, 3) != 1:
                 if self.teams_alive() > 2:
-                    while self.get_team(p2.team_name).has_ally(p1):
-                        p2 = self.select_2_players()[0]
+                    while self.get_team(defender.team_name).has_ally(attacker):
+                        defender = self.select_2_players()[0]
                     self.ally_dmg_prevent += 1
 
-        if p1.has_weapon():
-            weapon = p1.get_weapon()[0]
-            other_dmg = -p1.get_dmg()
+        if attacker.has_weapon():
+            weapon = attacker.get_weapon()[0]
+            other_dmg = -attacker.get_dmg()
             self_dmg = 0
-            combat_txt = "⚔ " + "**{}** hits **{}** with a _{}_."
-            print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), weapon.name))
+            combat_txt = "⚔ " + "**{}** hits **{}** with a _{}_, dealing {} damage."
+            print(combat_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name, weapon.dmg))
+            HungerGame.write_to_file(
+                combat_txt.format(attacker.to_string(), defender.to_string(), weapon.name, weapon.dmg))
+            self.defend(attacker, defender)
+
         else:
             SLAP_DMG = -4
             other_punches, self_punches = randint(3, 6), randint(1, 4)
             other_dmg, self_dmg = SLAP_DMG * other_punches, SLAP_DMG * self_punches
             combat_txt = "👊 " + "**{}** hits **{}** {} times and gets hit {} times themselves."
-            print(combat_txt.format(p1.to_esc_str(), p2.to_esc_str(), other_punches, self_punches))
+            print(combat_txt.format(attacker.to_esc_str(), defender.to_esc_str(), other_punches, self_punches))
+            HungerGame.write_to_file(
+                combat_txt.format(attacker.to_string(), defender.to_string(), other_punches, self_punches))
 
-        if self.get_team(p1.team_name).has_ally(self.get_team(p2.team_name)):
-            tn1, tn2 = p1.team_name, p2.team_name
+        if self.get_team(attacker.team_name).has_ally(self.get_team(defender.team_name)):
+            tn1, tn2 = attacker.team_name, defender.team_name
             t1, t2 = self.get_team(tn1), self.get_team(tn2)
             t1.remove_ally(t2)
             t2.remove_ally(t1)
             event = Events.twopl.RELATIONS.value[1]
             event_txt = event.description.format(tn1, tn2)
             print(event_txt)
+            HungerGame.write_to_file(event_txt)
             self.alliances_broken += 1
         return self_dmg, other_dmg
 
@@ -198,6 +214,7 @@ class HungerGame:
             t1.remove_player(p1)
             t2.add_player(p1)
             print(event_txt)
+            HungerGame.write_to_file(event_txt)
             self.betrayals += 1
         else:
             # change ally mode
@@ -213,6 +230,7 @@ class HungerGame:
                 self.alliances_formed += 1
             event_txt = event.description.format(tn1, tn2)
             print(event_txt)
+            HungerGame.write_to_file(event_txt)
 
     def do_2player_diff_team_event(self, p1, p2):
         event_chooser = randint(1, 12)
@@ -246,6 +264,7 @@ class HungerGame:
                 event = Events.twopl.RELATIONS.value[3]
                 event_txt = event.description.format(team_name, last_of_team.name)
                 print(event_txt)
+                HungerGame.write_to_file(event_txt)
 
     def kill(self, killer, victim):
         self.check_traitor(victim.team_name)
@@ -254,9 +273,11 @@ class HungerGame:
         if killer is not None:
             killer.kills += 1
             print("> 💀 {} is now  d e a d.".format(victim.to_esc_str()))
+            HungerGame.write_to_file("> 💀 {} is now  d e a d.".format(victim.to_string()))
         else:
             self.environmental_kills += 1
             print("> ☠ {} is now  d e a d.".format(victim.to_esc_str()))
+            HungerGame.write_to_file("> ☠ {} is now  d e a d.".format(victim.to_string()))
 
     def run_to_mid(self):
         def random_mid_plr():
@@ -275,6 +296,7 @@ class HungerGame:
                     self.kill(attacker, random_mid)
 
         print("\n**BEGINNING**")
+        HungerGame.write_to_file("\nBEGINNING")
         mid_players = set()
         for player in self.alive:
             if coinflip():
@@ -282,21 +304,28 @@ class HungerGame:
         for player in mid_players:
             if not player.is_dead():
                 player.give_weapon()
-                txt = "❔ **{}** runs towards the middle and grabs a _{}_"
+                txt = "❔ **{}** runs towards the middle and grabs a _{}_."
                 print(txt.format(player.to_esc_str(), player.get_weapon()[0].name))
+                HungerGame.write_to_file(txt.format(player.to_string(), player.get_weapon()[0].name))
                 attack_mid_plr(player)
 
     def attack(self, attacker, defender):
         weapon = attacker.get_weapon()[0]
         atk_txt = "⚔ **{}** hits **{}** with a _{}_."
         print(atk_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name))
+        HungerGame.write_to_file(atk_txt.format(attacker.to_string(), defender.to_string(), weapon.name))
+        self.defend(attacker, defender)
+        defender.take_attack(attacker.get_dmg())
+
+    def defend(self, attacker, defender):
         if defender.has_weapon():
             def_weapon = defender.get_weapon()[0]
             def_txt = "> 🛡️ **{}** tries to counter the attack of **{}** with their _{}_, blocking {} damage."
             print(
                 def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
+            HungerGame.write_to_file(
+                def_txt.format(defender.to_string(), attacker.to_string(), def_weapon.name, str(defender.get_res())))
             self.damage_blocked += defender.get_res()
-        defender.take_attack(attacker.get_dmg())
 
     def finished(self):
         if len(self.alive) <= 1:
@@ -312,31 +341,64 @@ class HungerGame:
         players.sort(key=lambda plyr: plyr.kills, reverse=True)
         for player in players:
             print("{} has {} kills".format(player.to_esc_str(), str(player.kills)))
-        print("and... {} people killed because of their own stupidity.".format(self.environmental_kills))
+            HungerGame.write_to_file(f"{str(player)} has {str(player.kills)} kills")
+        print(f"and... {self.environmental_kills} people killed because of their own stupidity.")
+        HungerGame.write_to_file(f"and... {self.environmental_kills} people killed because of their own stupidity.")
 
     def print_stats(self):
         print("\n```\n❤ HP UPDATE ❤")
+        HungerGame.write_to_file("\n❤ HP UPDATE ❤")
         for player in self.alive:
-            print("> {} ({}) has {} hp left.".format(player.to_string(), player.team_name, str(player.health)))
+            print(f"> {player.to_esc_str()} ({player.team_name}) has {str(player.health)} hp left.")
+            HungerGame.write_to_file(f"> {player.to_string()} ({player.team_name}) has {str(player.health)} hp left.")
         print("```")
 
     def print_teams(self):
-        print("`Welcome to the {} teams.`\n".format(str(self.get_nb_players_alive() // self.teamsize)))
+        print(f"Welcome to the {str(self.get_nb_players_alive() // self.teamsize)} teams.\n")
+        HungerGame.write_to_file(f"Welcome to the {str(self.get_nb_players_alive() // self.teamsize)} teams.\n")
         for player_nr in range(0, self.get_nb_players_alive(), self.teamsize):
-            print("\n")
-            print("**" + str(self.alive[player_nr].team_name) + "**")
+            print(f"\n**{str(self.alive[player_nr].team_name)}**")
+            HungerGame.write_to_file(f"\n{str(self.alive[player_nr].team_name)}")
             for add in range(self.teamsize):
-                print("> " + self.alive[player_nr + add].to_string())
+                print(f"> {self.alive[player_nr + add].to_string()}")
+                HungerGame.write_to_file(f"> {self.alive[player_nr + add].to_string()}")
+        HungerGame.write_to_file("==========")
 
     def print_fun_info(self):
-        print("\nDamage blocked: {}\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
-            self.damage_blocked, self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
-        ))
+        print(
+            "\nDamage blocked: {}\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
+                self.damage_blocked, self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
+            ))
+        HungerGame.write_to_file(
+            "\nDamage blocked: {}\nAlliances formed: {}\nAlliances broken: {}\nDamage prevented by alliances: {}\nBetrayals: {}".format(
+                self.damage_blocked, self.alliances_formed, self.alliances_broken, self.ally_dmg_prevent, self.betrayals
+            ))
+
+
+def split_into_tweets():
+    text = open("hungerGame.txt").read()
+    puncts = ['\n\n', '==========', '.']
+    tweets = []
+
+    while len(text) > 280:
+        cut_where, cut_why = max((text.rfind(punc, 0, 280), punc) for punc in puncts)
+        if cut_where <= 0:
+            cut_where = text.rfind(' ', 0, 280)
+            cut_why = ' '
+        cut_where += len(cut_why)
+        tweets.append(text[:cut_where].rstrip())
+        text = text[cut_where:].lstrip()
+
+    tweets.append(text)
+    with open("hungerGameTweets.txt", "w") as file:
+        file.write("\n-------------\n".join(tweets))
 
 
 def main():
     parser = inputs.make_parser()
     args = parser.parse_args()
+    file = open("hungerGame.txt", "w")
+    file.close()
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "), debug=args.debug)
     print(".")
     game.print_teams()
@@ -347,17 +409,23 @@ def main():
             game.pass_night()
         game.print_stats()
 
+    HungerGame.write_to_file('')
     game.print_kill_counts()
     game.print_fun_info()
-    print("\n\nThe games have finally ended after {} days...".format(str(game.day_count)))
+    print(f"\n\nThe games have finally ended after {str(game.day_count)} days...")
+    HungerGame.write_to_file(f"\n\nThe games have finally ended after {str(game.day_count)} days...")
     winners_msg = "\n|| winner(s): **{}** fighting for {}; '_{}_'||"
     winners = str(game.players_to_esc_string(game.alive))
+    HungerGame.write_to_file(game.players_to_string(game.alive))
     if game.alive:
         last_team = game.alive[0].team_name
         print(winners_msg.format(winners, last_team, game.get_team(last_team).victory_msg))
+        HungerGame.write_to_file(winners_msg.format(winners, last_team, game.get_team(last_team).victory_msg))
     else:
         print("Everyone died...")
+        HungerGame.write_to_file("Everyone died...")
 
+    split_into_tweets()
     quit()
 
 
