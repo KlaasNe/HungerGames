@@ -17,11 +17,11 @@ class Weapon(Item):
 
 weapons = {
     "melee": [
-        Weapon("two handed axe", dmg=100, res=10, prc=-20, slot="2hand"),
-        Weapon("two handed sword", dmg=80, res=15, prc=-15, slot="2hand"),
-        Weapon("one handed axe", dmg=50, res=5, prc=-10, slot="hand"),
-        Weapon("one handed sword", dmg=40, res=8, prc=-5, slot="hand"),
-        Weapon("basic knife", dmg=15, prc=10, slot="hand"),
+        Weapon("two-handed axe", dmg=100, res=10, prc=-20, slot="2hand"),
+        Weapon("two-handed sword", dmg=80, res=15, prc=-15, slot="2hand"),
+        Weapon("one-handed axe", dmg=50, res=5, prc=-10, slot="hand"),
+        Weapon("one-handed sword", dmg=40, res=8, prc=-5, slot="hand"),
+        Weapon("dagger", dmg=15, prc=10, slot="hand"),
         Weapon("butterfly knife", dmg=20, prc=9, slot="hand"),
         Weapon("sock with rocks", dmg=10, prc=-5, slot="hand"),
         Weapon("blue lightsaber", dmg=70, res=10, prc=10, slot="2hand"),

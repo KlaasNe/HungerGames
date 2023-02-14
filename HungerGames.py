@@ -174,17 +174,17 @@ class HungerGame:
             weapon = attacker.get_weapon()[0]
             other_dmg = -attacker.get_dmg()
             self_dmg = 0
-            combat_txt = "⚔ " + "**{}** hits **{}** with a _{}_, dealing {} damage."
+            combat_txt = "⚔ **{}** hits **{}** with a _{}_, dealing {} damage."
             print(combat_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name, weapon.dmg))
             HungerGame.write_to_file(
-                combat_txt.format(attacker.to_string(), defender.to_string(), weapon.name, weapon.dmg))
+                "⚔ {} hits {} with a {}, dealing {} damage.".format(attacker.to_string(), defender.to_string(), weapon.name, weapon.dmg))
             self.defend(attacker, defender)
 
         else:
             SLAP_DMG = -4
             other_punches, self_punches = randint(3, 6), randint(1, 4)
             other_dmg, self_dmg = SLAP_DMG * other_punches, SLAP_DMG * self_punches
-            combat_txt = "👊 " + "**{}** hits **{}** {} times and gets hit {} times themselves."
+            combat_txt = "👊 " + "{} hits {} {} times and gets hit {} times themselves."
             print(combat_txt.format(attacker.to_esc_str(), defender.to_esc_str(), other_punches, self_punches))
             HungerGame.write_to_file(
                 combat_txt.format(attacker.to_string(), defender.to_string(), other_punches, self_punches))
@@ -306,14 +306,14 @@ class HungerGame:
                 player.give_weapon()
                 txt = "❔ **{}** runs towards the middle and grabs a _{}_."
                 print(txt.format(player.to_esc_str(), player.get_weapon()[0].name))
-                HungerGame.write_to_file(txt.format(player.to_string(), player.get_weapon()[0].name))
+                HungerGame.write_to_file("❔ {} runs towards the middle and grabs a {}.".format(player.to_string(), player.get_weapon()[0].name))
                 attack_mid_plr(player)
 
     def attack(self, attacker, defender):
         weapon = attacker.get_weapon()[0]
         atk_txt = "⚔ **{}** hits **{}** with a _{}_."
         print(atk_txt.format(attacker.to_esc_str(), defender.to_esc_str(), weapon.name))
-        HungerGame.write_to_file(atk_txt.format(attacker.to_string(), defender.to_string(), weapon.name))
+        HungerGame.write_to_file("⚔ {} hits {} with a {}.".format(attacker.to_string(), defender.to_string(), weapon.name))
         self.defend(attacker, defender)
         defender.take_attack(attacker.get_dmg())
 
@@ -324,7 +324,7 @@ class HungerGame:
             print(
                 def_txt.format(defender.to_esc_str(), attacker.to_esc_str(), def_weapon.name, str(defender.get_res())))
             HungerGame.write_to_file(
-                def_txt.format(defender.to_string(), attacker.to_string(), def_weapon.name, str(defender.get_res())))
+                "> 🛡️ {} tries to counter the attack of {} with their {}, blocking {} damage.".format(defender.to_string(), attacker.to_string(), def_weapon.name, str(defender.get_res())))
             self.damage_blocked += defender.get_res()
 
     def finished(self):
@@ -362,7 +362,6 @@ class HungerGame:
             for add in range(self.teamsize):
                 print(f"> {self.alive[player_nr + add].to_string()}")
                 HungerGame.write_to_file(f"> {self.alive[player_nr + add].to_string()}")
-        HungerGame.write_to_file("==========")
 
     def print_fun_info(self):
         print(
@@ -402,16 +401,23 @@ def main():
     game = HungerGame(get_int("Number of districts:\n> "), get_int("Teamsize:\n> "), debug=args.debug)
     print(".")
     game.print_teams()
+    HungerGame.write_to_file("==========")
     game.run_to_mid()
+    HungerGame.write_to_file("==========")
     while not game.finished():
         game.pass_day()
+        HungerGame.write_to_file("==========")
         if not game.finished():
             game.pass_night()
+        HungerGame.write_to_file("==========")
         game.print_stats()
+        HungerGame.write_to_file("==========")
 
     HungerGame.write_to_file('')
     game.print_kill_counts()
+    HungerGame.write_to_file("==========")
     game.print_fun_info()
+    HungerGame.write_to_file("==========")
     print(f"\n\nThe games have finally ended after {str(game.day_count)} days...")
     HungerGame.write_to_file(f"\n\nThe games have finally ended after {str(game.day_count)} days...")
     winners_msg = "\n|| winner(s): **{}** fighting for {}; '_{}_'||"
